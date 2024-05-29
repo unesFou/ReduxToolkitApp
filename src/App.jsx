@@ -5,7 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Provider } from 'react-redux';
 import store from './app/store';
 import { loadUserFromStorage } from './features/authSlice/authSlice';
-import Authentication from './features/authSlice/Authentication';
+import Authentication from './component/Authentication/Authentication';
+import Dashboard from './component/dashboard/Dashboard';
 import NavBarApp from './navBar/NavBarApp';
 
 const App = () => {
@@ -22,7 +23,10 @@ const App = () => {
         {!user ? (
           <Authentication />
         ) : (
+          <>
           <NavBarApp user={user} />
+          <Dashboard />
+          </>
         )}
       </Router>
     </Provider>

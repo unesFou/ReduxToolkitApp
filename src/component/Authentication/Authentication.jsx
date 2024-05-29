@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from '@mui/material/Alert';
-import { login } from './authSlice';
+import { login } from '../../features/authSlice/authSlice';
 import {
   Button,
   Container,
