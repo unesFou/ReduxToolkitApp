@@ -63,7 +63,7 @@ const NavBarApp = ({ user }) => {
   };
   const StyledMenu = withStyles({
     paper: {
-      border: '1px solid #d3d4d5',
+      border: '0px solid #d3d4d5',
     },
   })((props) => (
     <Menu
