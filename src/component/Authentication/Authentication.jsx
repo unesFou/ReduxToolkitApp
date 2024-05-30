@@ -10,7 +10,6 @@ import {
   TextField,
   Checkbox,
   FormControlLabel,
-  Typography,
   CircularProgress,
   Link,
 } from '@material-ui/core';

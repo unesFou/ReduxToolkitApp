@@ -1,20 +1,26 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+
 // Define the async thunk
 export const fetchDashboardData = createAsyncThunk(
   'dashboard/fetchData',
   async ({ startDate, endDate }, { rejectWithValue }) => {
+    const d_s = new Date();
+    d_s.setDate(d_s.getDate() - 2);
+    const d_e = new Date();
     try {
       const response = await axios.post(`/api/dashboard`, {
         params: {
-          date_start: startDate.toISOString().slice(0, 16),
-          date_end: endDate.toISOString().slice(0, 16),
+          // date_start: startDate.toISOString().slice(0, 16),
+          // date_end: endDate.toISOString().slice(0, 16),
+          date_start: d_s.toISOString().slice(0, 16),
+          date_end: d_e.toISOString().slice(0, 16),
         }
       }, {
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${setUser.session_id}`, // Assuming the sessionID is a JWT token
+        // 'Authorization': `Bearer ${setUser.session_id}`, // Assuming the sessionID is a JWT token
         },
         body: JSON.stringify({}),
         credentials: 'include',

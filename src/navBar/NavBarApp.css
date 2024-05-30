@@ -1,86 +1,42 @@
 .root {
-  display: flex;
+  flex-grow: 1;
 }
-
 .appBar {
-  width: 100%;
+  z-index: 1400; /* Ensure it stays above the drawer */
 }
-
 .toolbar {
   display: flex;
   justify-content: space-between;
 }
-
-.drawer {
-  width: 25vw;
-  flex-shrink: 0;
+.menuButton {
+  margin-right: 16px;
 }
-
-.drawerPaper {
-  width: 25vw;
-}
-
-/*.toolbarSpacer {
-  min-height: 64px;  Match the AppBar height
-} */
-
-.content {
-  flex-grow: 1;
-  padding: 16px;
-  margin-left: 25vw; /* Shift the main content to the right to make space for the drawer */
-}
-
-.leftSection {
-  display: flex;
-  align-items: center;
-}
-
 .rightSection {
   display: flex;
   align-items: center;
 }
-
-.menuButton {
-  margin-right: 16px;
-}
-
 .search {
   position: relative;
   border-radius: 4px;
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white !important;
   margin-right: 16px;
   width: 100%;
-  max-width: 400px;
+  max-width: 300px;
 }
-
 .searchIcon {
   padding: 8px;
   height: 100%;
   position: absolute;
   pointer-events: none;
-  display: flex;
+  display: contents;
   align-items: center;
   justify-content: center;
 }
-
 .inputRoot {
-  color: 'inherit';
+  color: inherit;
 }
-
 .inputInput {
   padding: 8px 8px 8px 40px;
   width: 100%;
-}
-
-.MuiDrawer-paper {
-  top: 0;
-  flex: 1 0 auto;
-  height: 35% !important;
-  display: grid !important;
-  z-index: 0 !important;
-  outline: 0;
-  position: fixed;
-  overflow-y: auto;
-  flex-direction: column;
-  -webkit-overflow-scrolling: touch;
 }

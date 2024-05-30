@@ -1,6 +1,5 @@
 import React from 'react';
 import AppBar from '@material-ui/core/AppBar';
-import Drawer from '@material-ui/core/Drawer';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import InputBase from '@material-ui/core/InputBase';
@@ -11,37 +10,26 @@ import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
-import SettingsIcon from '@material-ui/icons/Settings';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Hidden from '@material-ui/core/Hidden';
 
+import Hidden from '@material-ui/core/Hidden';
 import { withStyles } from '@material-ui/core/styles';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import PersonIcon from '@material-ui/icons/Person';
-
-import TimelineIcon from '@material-ui/icons/Timeline';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-
 import { useDispatch } from 'react-redux';
 import { logout } from '../features/authSlice/authSlice';
-
 import './NavBarApp.css';
 
-const NavBarApp = ({ user }) => {
-
+const NavBarApp = ({ user, handleDrawerToggle }) => {
   const dispatch = useDispatch();
-
   const handleLogout = () => {
     dispatch(logout());
   };
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -61,6 +49,7 @@ const NavBarApp = ({ user }) => {
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
+
   const StyledMenu = withStyles({
     paper: {
       border: '0px solid #d3d4d5',
@@ -80,6 +69,7 @@ const NavBarApp = ({ user }) => {
       {...props}
     />
   ));
+
   const StyledMenuItem = withStyles((theme) => ({
     root: {
       '&:focus': {
@@ -90,6 +80,7 @@ const NavBarApp = ({ user }) => {
       },
     },
   }))(MenuItem);
+
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -101,24 +92,18 @@ const NavBarApp = ({ user }) => {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <StyledMenu
-        id="customized-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-       
-      >
+      <StyledMenu id="customized-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)}>
         <StyledMenuItem>
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText primary="Mon Compte" />
+          <ListItemText primary="My Account" />
         </StyledMenuItem>
-        <StyledMenuItem>
+        <StyledMenuItem onClick={handleLogout}>
           <ListItemIcon>
             <PowerSettingsNewIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText primary="Déconnéction"  onClick={handleLogout} />
+          <ListItemText primary="Logout" />
         </StyledMenuItem>
       </StyledMenu>
     </Menu>
@@ -131,17 +116,17 @@ const NavBarApp = ({ user }) => {
       <AppBar position="fixed" className="appBar">
         <Toolbar className="toolbar">
           <div className="leftSection">
-            <Hidden mdUp> {/* Hide on medium and larger screens */}
+            <Hidden mdUp>
               <IconButton
                 edge="start"
                 className="menuButton"
                 color="inherit"
                 aria-label="open drawer"
+                onClick={handleDrawerToggle}
               >
                 <MenuIcon />
               </IconButton>
             </Hidden>
-           
           </div>
           <div className="rightSection">
             <div className="search">
@@ -155,9 +140,9 @@ const NavBarApp = ({ user }) => {
                   input: 'inputInput',
                 }}
                 inputProps={{ 'aria-label': 'search' }}
-                />
+              />
             </div>
-                {user.name}
+            {user.name}
             <IconButton aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <MailIcon />
@@ -181,38 +166,9 @@ const NavBarApp = ({ user }) => {
           </div>
         </Toolbar>
       </AppBar>
-      <Hidden smDown> {/* Hide on small screens */}
-        <Drawer
-          className="drawer"
-          variant="permanent"
-          classes={{
-            paper: 'drawerPaper',
-          }}
-        >
-          
-          <Divider />
-          <List>
-            <ListItem button>
-              <ListItemIcon><TimelineIcon /></ListItemIcon>
-              <ListItemText primary="Temps Réel ..." />
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon><DashboardIcon /></ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            
-            <ListItem button>
-              <ListItemIcon><SettingsIcon /></ListItemIcon>
-              <ListItemText primary="Setting" />
-            </ListItem>
-            
-          </List>
-        </Drawer>
-      </Hidden>
       {renderMenu}
-      
     </div>
   );
-}
+};
 
 export default NavBarApp;
