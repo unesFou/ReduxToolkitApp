@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
-import InputBase from '@material-ui/core/InputBase';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
@@ -13,23 +12,27 @@ import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-
 import Hidden from '@material-ui/core/Hidden';
 import { withStyles } from '@material-ui/core/styles';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import PersonIcon from '@material-ui/icons/Person';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import { logout } from '../features/authSlice/authSlice';
+import Box from '@mui/material/Box';
 import './NavBarApp.css';
 
 const NavBarApp = ({ user, handleDrawerToggle }) => {
   const dispatch = useDispatch();
+  const { data } = useSelector((state) => state.dashboard);
+  
   const handleLogout = () => {
     dispatch(logout());
   };
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -81,6 +84,12 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
     },
   }))(MenuItem);
 
+  const [searchValue, setSearchValue] = useState('');
+
+  const handleSearchInputChange = (event, value) => {
+    setSearchValue(value);
+  };
+
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -129,20 +138,30 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
             </Hidden>
           </div>
           <div className="rightSection">
-            <div className="search">
-              <div className="searchIcon">
-                <SearchIcon />
-              </div>
-              <InputBase
-                placeholder="Search…"
-                classes={{
-                  root: 'inputRoot',
-                  input: 'inputInput',
-                }}
-                inputProps={{ 'aria-label': 'search' }}
+          <Box sx={{ width: 300 }}>
+              <Autocomplete
+                freeSolo
+                options={data && data.map((item) => item.name)}
+                inputValue={searchValue}
+                onInputChange={handleSearchInputChange}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Search…"
+                    variant="outlined"
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <IconButton aria-label="search">
+                          <SearchIcon />
+                        </IconButton>
+                      ),
+                    }}
+                  />
+                )}
               />
-            </div>
-            {user.name}
+            </Box>
+            <span>{user.name}</span>
             <IconButton aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <MailIcon />
