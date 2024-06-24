@@ -20,7 +20,7 @@ const Authentication = () => {
   const [password, setPassword] = useState('');
 
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const {user, loading, error } = useSelector((state) => state.auth);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -31,6 +31,9 @@ const Authentication = () => {
   return (
     <Container className='Authentication'>
       <header className='Authentication-header'>
+              {loading && <CircularProgress />}
+              {user && <Alert severity="success">Authentification avec succés</Alert>}
+              {error && <Alert severity="error">Login ou Mot de passe est incorrect</Alert>}
         <Card>
           <CardContent>
             <form onSubmit={handleLogin}>
@@ -74,8 +77,7 @@ const Authentication = () => {
               >
                 Sign In
               </Button>
-              {loading && <><CircularProgress /><Alert severity="success">Authentification avec succés</Alert></>}
-              {error && <Alert severity="error">Login ou Mot de passe est incorrect</Alert>}
+             
               <div className="d-flex justify-content-between mx-4 mb-4">
                 <Link href="#" variant="body2">
                   Forgot password?
