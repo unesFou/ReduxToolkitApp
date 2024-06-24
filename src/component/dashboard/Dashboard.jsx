@@ -5,7 +5,7 @@ import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import  Card  from 'react-bootstrap/Card';
 import  Button  from 'react-bootstrap/Button';
 import Placeholder from 'react-bootstrap/Placeholder';
-
+ import './Dashboard.css';
 const Dashboard = ({ startDate, endDate }) => {
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector((state) => state.dashboard);
@@ -21,15 +21,14 @@ const Dashboard = ({ startDate, endDate }) => {
 
   return (
     <Container className='content'>
-      <Row >
+     <Row style={{ display: 'flex', flexWrap: 'wrap' }}>
         {data && data.map((item, index) => (
-          <Col key={index} xs={12} sm={4} md={4} lg={3} xl={2}>
-            <Card style={{ width: '18rem', paddingRight : '95px' }}>
+          <div key={index} className="col-6 col-sm-3 col-md-3 col-lg-3 col-xl-2" style={{ marginBottom: '20px' }}>
+            <Card style={{ width: 'auto', padding: '10px' }}>
               <Card.Img variant="top" src="https://www.h24info.ma/wp-content/uploads/2022/09/gendarmerie2022.jpg" />
               <Card.Body>
                 <Card.Title>{item.name || 'Card Title'}</Card.Title>
                 <Placeholder as="p" animation="glow">
-                  {/* <Placeholder xs={6} /> */}
                   {item.description || 'Some quick example text to build on the card title and make up the bulk of the card\'s content.'}
                 </Placeholder>
                 <Card.Text>
@@ -38,9 +37,10 @@ const Dashboard = ({ startDate, endDate }) => {
                 <Button variant="primary">Go somewhere</Button>
               </Card.Body>
             </Card>
-          </Col>
+          </div>
         ))}
       </Row>
+
     </Container>
   );
 };

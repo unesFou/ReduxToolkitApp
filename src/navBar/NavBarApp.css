@@ -1,8 +1,14 @@
 .root {
   flex-grow: 1;
 }
+.MuiAppBar-root {
+  z-index : 10000 !important;
+}
+.MuiDrawer-paper {
+  top: 10% !important;
+}
 .appBar {
-  z-index: 1400; /* Ensure it stays above the drawer */
+  z-index: 0;/*  Ensure it stays above the drawer */
 }
 .toolbar {
   display: flex;
@@ -18,7 +24,7 @@
 .search {
   position: relative;
   border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(243, 240, 240, 0.15);
   color: white !important;
   margin-right: 16px;
   width: 100%;
@@ -34,9 +40,14 @@
   justify-content: center;
 }
 .inputRoot {
-  color: inherit;
+  color : white !important;
 }
 .inputInput {
   padding: 8px 8px 8px 40px;
   width: 100%;
+}
+
+/*------------------inherit css-------------------*/
+.css-8j6b76-MuiInputBase-root-MuiOutlinedInput-root{
+  color : white !important;
 }

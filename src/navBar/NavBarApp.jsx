@@ -147,7 +147,7 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    placeholder="Search…"
+                    placeholder="Search unité…"
                     variant="outlined"
                     InputProps={{
                       ...params.InputProps,

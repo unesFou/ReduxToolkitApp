@@ -5,4 +5,12 @@
   .drawerPaper {
     width: 240px;
   }
-  
+  .MuiList-padding {
+    padding-left : 9% !important;
+  }
+  .MuiIconButton-root{
+    color: rgb(255 255 255 / 54%) !important;
+  }
+  .MuiListItemIcon-root {
+    min-width: 20% !important;
+  }

@@ -9,7 +9,6 @@ import Dashboard from './component/dashboard/Dashboard';
 import NavBarApp from './navBar/NavBarApp';
 import LeftMenu from './LeftMenu/LeftMenu';
 
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -43,13 +42,16 @@ const App = () => {
 const Layout = ({ handleDrawerToggle, mobileOpen }) => {
   const user = useSelector((state) => state.auth.user);
   return (
-    <div style={{ display: 'flex' }}>
+      <>
       <NavBarApp user={user} handleDrawerToggle={handleDrawerToggle} />
+    <div style={{ display: 'flex' }}>
+      
       <LeftMenu handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />
-      <main style={{ flexGrow: 12, paddingLeft: '0%' , paddingTop:'5%' }}>
+      <main style={{ flexGrow: 4, paddingLeft: '0%' , paddingTop:'5%',maxWidth: '1680px' }} >
         <Outlet />
       </main>
     </div>
+    </>
   );
 };
 

@@ -10,13 +10,18 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import SettingsIcon from '@material-ui/icons/Settings';
 import Hidden from '@material-ui/core/Hidden';
 import { Link } from 'react-router-dom';
+
+import logo from './../images/rg.png';
 import './LeftMenu.css';
 
 const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
   const drawer = (
     <div>
       <Divider />
-      <List>
+      <div className="menu-header p-4" >
+        <img src={logo} alt="Gestion de présence Logo" className="w-12 h-8 mx-auto" style={{maxWidth: '35%'}} />
+      </div>
+      <List >
         <ListItem button>
           <ListItemIcon><TimelineIcon /></ListItemIcon>
           <ListItemText primary="Real Time" />
@@ -35,6 +40,7 @@ const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
 
   return (
     <nav className="drawer">
+      
       <Hidden smUp implementation="css">
         <Drawer
           variant="temporary"

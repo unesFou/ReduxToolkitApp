@@ -7,7 +7,7 @@ export const fetchDashboardData = createAsyncThunk(
   'dashboard/fetchData',
   async ({ startDate, endDate }, { rejectWithValue }) => {
     const d_s = new Date();
-    d_s.setDate(d_s.getDate() - 2);
+    d_s.setDate(d_s.getDate() - 60);
     const d_e = new Date();
     try {
       const response = await axios.post(`/api/dashboard`, {
