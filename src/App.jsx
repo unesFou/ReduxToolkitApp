@@ -6,6 +6,7 @@ import store from './app/store';
 import { loadUserFromStorage } from './features/authSlice/authSlice';
 import Authentication from './component/Authentication/Authentication';
 import Dashboard from './component/dashboard/Dashboard';
+import Statistiques from './component/statistiques/statistiques';
 import NavBarApp from './navBar/NavBarApp';
 import LeftMenu from './LeftMenu/LeftMenu';
 
@@ -32,6 +33,8 @@ const App = () => {
           <Route path="/" element={!user ? <Authentication /> : <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />}>
             <Route path="dashboard" element={<Dashboard />}>
             </Route>
+            <Route path="statistiques" element={<Statistiques />}>
+            </Route>
           </Route>
         </Routes>
       </Router>
@@ -47,7 +50,7 @@ const Layout = ({ handleDrawerToggle, mobileOpen }) => {
     <div style={{ display: 'flex' }}>
       
       <LeftMenu handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />
-      <main style={{ flexGrow: 4, paddingLeft: '0%' , paddingTop:'5%',maxWidth: '1680px' }} >
+      <main style={{ flexGrow: 4, paddingLeft: '0%' , paddingTop:'5%' }} >
         <Outlet />
       </main>
     </div>

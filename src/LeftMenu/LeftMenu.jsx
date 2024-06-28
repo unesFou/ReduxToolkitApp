@@ -7,6 +7,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import DashboardIcon from '@material-ui/icons/Dashboard';
+import EqualizerIcon from '@material-ui/icons/Equalizer';
 import SettingsIcon from '@material-ui/icons/Settings';
 import Hidden from '@material-ui/core/Hidden';
 import { Link } from 'react-router-dom';
@@ -19,7 +20,7 @@ const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
     <div>
       <Divider />
       <div className="menu-header p-4" >
-        <img src={logo} alt="Gestion de présence Logo" className="w-12 h-8 mx-auto" style={{maxWidth: '35%'}} />
+        <img src={logo} alt="Gestion de présence Logo" className="w-12 h-8 mx-auto" style={{maxWidth: '25%'}} />
       </div>
       <List >
         <ListItem button>
@@ -29,6 +30,10 @@ const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
         <ListItem button component={Link} to="/dashboard">
           <ListItemIcon><DashboardIcon /></ListItemIcon>
           <ListItemText primary="Dashboard" />
+        </ListItem>
+        <ListItem button component={Link} to="/statistiques">
+          <ListItemIcon><EqualizerIcon /></ListItemIcon>
+          <ListItemText primary="Statistiques" />
         </ListItem>
         <ListItem button>
           <ListItemIcon><SettingsIcon /></ListItemIcon>

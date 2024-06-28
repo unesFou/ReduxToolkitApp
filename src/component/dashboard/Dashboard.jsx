@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDashboardData } from './../../features/dashboardSlice/dashboardSlice';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Row, Spinner } from 'react-bootstrap';
 import  Card  from 'react-bootstrap/Card';
 import  Button  from 'react-bootstrap/Button';
 import Placeholder from 'react-bootstrap/Placeholder';
@@ -17,7 +17,7 @@ const Dashboard = ({ startDate, endDate }) => {
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                                 <Spinner animation="grow" />
                               </div>;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div>Error: {error}</div></div>;
 
   return (
     <Container className='content'>
