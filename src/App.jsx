@@ -12,6 +12,7 @@ import LeftMenu from './LeftMenu/LeftMenu';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import './App.css';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -31,10 +32,8 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/" element={!user ? <Authentication /> : <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />}>
-            <Route path="dashboard" element={<Dashboard />}>
-            </Route>
-            <Route path="statistiques" element={<Statistiques />}>
-            </Route>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="statistiques" element={<Statistiques />} />
           </Route>
         </Routes>
       </Router>
@@ -45,15 +44,16 @@ const App = () => {
 const Layout = ({ handleDrawerToggle, mobileOpen }) => {
   const user = useSelector((state) => state.auth.user);
   return (
-      <>
+    <>
       <NavBarApp user={user} handleDrawerToggle={handleDrawerToggle} />
-    <div style={{ display: 'flex' }}>
-      
-      <LeftMenu handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />
-      <main style={{ flexGrow: 4, paddingLeft: '0%' , paddingTop:'5%' }} >
-        <Outlet />
-      </main>
-    </div>
+      <div className="layout">
+        <div className={`left-menu ${mobileOpen ? 'open' : ''}`}>
+          <LeftMenu handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />
+        </div>
+        <main className="main-content">
+          <Outlet />
+        </main>
+      </div>
     </>
   );
 };

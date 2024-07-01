@@ -21,18 +21,27 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { logout } from '../features/authSlice/authSlice';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import DateRangePickerComponent from '../component/DatePicker/DateRangePicker';
 import './NavBarApp.css';
 
 const NavBarApp = ({ user, handleDrawerToggle }) => {
   const dispatch = useDispatch();
   const { data } = useSelector((state) => state.dashboard);
-  
+
   const handleLogout = () => {
     dispatch(logout());
   };
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -51,6 +60,14 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
+  };
+
+  const handleSearchInputChange = (event, value) => {
+    setSearchValue(value);
+  };
+
+  const handleDatePickerToggle = () => {
+    setShowDatePicker(!showDatePicker);
   };
 
   const StyledMenu = withStyles({
@@ -83,12 +100,6 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
       },
     },
   }))(MenuItem);
-
-  const [searchValue, setSearchValue] = useState('');
-
-  const handleSearchInputChange = (event, value) => {
-    setSearchValue(value);
-  };
 
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
@@ -138,7 +149,7 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
             </Hidden>
           </div>
           <div className="rightSection">
-          <Box sx={{ width: 300 }}>
+            <Box sx={{ width: 300 }}>
               <Autocomplete
                 freeSolo
                 options={data && data.map((item) => item.name)}
@@ -161,7 +172,9 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
                 )}
               />
             </Box>
-            <span>{user.name}</span>
+            <Button variant="contained" color="primary" onClick={handleDatePickerToggle}>
+              Choisir une Date ?
+            </Button>
             <IconButton aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <MailIcon />
@@ -172,6 +185,7 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
                 <NotificationsIcon />
               </Badge>
             </IconButton>
+            <span>{user.name}</span>
             <IconButton
               edge="end"
               aria-label="account of current user"
@@ -186,6 +200,20 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
         </Toolbar>
       </AppBar>
       {renderMenu}
+      <Dialog open={showDatePicker} onClose={handleDatePickerToggle} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Choisir une Date</DialogTitle>
+        <DialogContent>
+          <DateRangePickerComponent />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDatePickerToggle} color="primary">
+            Annuler
+          </Button>
+          <Button onClick={handleDatePickerToggle} color="primary">
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

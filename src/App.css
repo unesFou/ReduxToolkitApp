@@ -1,38 +1,90 @@
-.App {
-  text-align: center;
+/* General Styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-     animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+#root {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  height: 100vh;
+}
+
+/* Navigation Bar */
+.navbar-app {
+  background-color: #007bff;
   color: white;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
 }
 
-.App-link {
-  color: #61dafb;
+.navbar-app .brand {
+  flex-grow: 1;
+  font-size: 24px;
+  font-weight: bold;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.navbar-app .toggle-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+}
+
+/* Layout */
+.layout {
+  display: flex;
+  height: calc(100% - 50px); /* Adjust based on your navbar height */
+}
+
+.left-menu {
+  /* background-color: #343a40; */
+  color: white;
+  width: 250px;
+  padding: 20px;
+  transition: transform 0.3s ease;
+}
+
+.left-menu.mobile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transform: translateX(-100%);
+}
+
+.left-menu.mobile.open {
+  transform: translateX(0);
+}
+
+.main-content {
+  /* flex-grow: 1; */
+  /* padding: 20px; */
+  background-color: white;
+   overflow-y: auto; /**/
+  margin-top: 2%;
+  width: 100%;
+}
+
+/* Date Picker */
+.date-range-picker {
+  margin: 20px 0;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .left-menu {
+    transform: translateX(-250px);
   }
-  to {
-    transform: rotate(360deg);
+  
+  .left-menu.open {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    padding: 10px;
   }
 }
