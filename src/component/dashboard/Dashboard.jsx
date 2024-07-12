@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { DataGrid } from '@mui/x-data-grid';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDashboardData } from './../../features/dashboardSlice/dashboardSlice';
 import { Container, Row, Spinner } from 'react-bootstrap';
-import  Card  from 'react-bootstrap/Card';
-import  Button  from 'react-bootstrap/Button';
-import Placeholder from 'react-bootstrap/Placeholder';
- import './Dashboard.css';
+import { format } from 'date-fns';
+import './Dashboard.css';
+
 const Dashboard = ({ startDate, endDate }) => {
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector((state) => state.dashboard);
@@ -14,33 +14,65 @@ const Dashboard = ({ startDate, endDate }) => {
     dispatch(fetchDashboardData({ startDate, endDate }));
   }, [dispatch, startDate, endDate]);
 
-  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                                <Spinner animation="grow" />
-                              </div>;
-  if (error) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div>Error: {error}</div></div>;
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    if (data) {
+      const transformedData = transformData(data);
+      setRows(transformedData);
+    }
+  }, [data]);
+
+  const transformData = (data) => {
+    const flattenData = (items, parentName = '') => {
+      return items.reduce((acc, item) => {
+        const currentName = parentName ? `${parentName} > ${item.name}` : item.name;
+        acc.push({
+          id: item.id,
+          name: currentName,
+          presence_rate: item.presence_rate,
+          absence_duration: calculateAbsenceDuration(item.presence_rate),
+        });
+        if (item.childs) {
+          acc = acc.concat(flattenData(item.childs, currentName));
+        }
+        return acc;
+      }, []);
+    };
+
+    return flattenData([data['12']]);
+  };
+
+  const calculateAbsenceDuration = (presenceRate) => {
+    const absenceRate = 100 - presenceRate;
+    return `${absenceRate} days`;
+  };
+
+  const columns = [
+    { field: 'name', headerName: 'Name', width: 300 },
+    { field: 'absence_duration', headerName: 'Absence Duration', width: 200 },
+  ];
+
+  if (loading)
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Spinner animation="grow" />
+      </div>
+    );
+  if (error)
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div>Error: {error}</div>
+      </div>
+    );
 
   return (
-    <Container className='content'>
-     <Row style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {data && data.map((item, index) => (
-          <div key={index} className="col-6 col-sm-3 col-md-3 col-lg-3 col-xl-2" style={{ marginBottom: '20px' }}>
-            <Card style={{ width: 'auto', padding: '10px' }}>
-              <Card.Img variant="top" src="https://www.h24info.ma/wp-content/uploads/2022/09/gendarmerie2022.jpg" />
-              <Card.Body>
-                <Card.Title>{item.name || 'Card Title'}</Card.Title>
-                <Placeholder as="p" animation="glow">
-                  {item.description || 'Some quick example text to build on the card title and make up the bulk of the card\'s content.'}
-                </Placeholder>
-                <Card.Text>
-                  {item.description || 'Some quick example text to build on the card title and make up the bulk of the card\'s content.'}
-                </Card.Text>
-                <Button variant="primary">Go somewhere</Button>
-              </Card.Body>
-            </Card>
-          </div>
-        ))}
+    <Container className="content">
+      <Row style={{ display: 'flex', flexWrap: 'wrap' }}>
+        <div style={{ height: 800, width: '100%' }}>
+          <DataGrid rows={rows} columns={columns} pageSize={10} />
+        </div>
       </Row>
-
     </Container>
   );
 };

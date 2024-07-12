@@ -87,4 +87,12 @@ body, html {
   .main-content {
     padding: 10px;
   }
+
+  .MuiContainer-root .MuiContainer-maxWidthLg content .css-1oqqzyl-MuiContainer-root {
+    padding-top: 0% !important;
+  }
+
+  .container{
+    max-width: 98% !important;
+  }
 }

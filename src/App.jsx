@@ -13,6 +13,7 @@ import LeftMenu from './LeftMenu/LeftMenu';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './App.css';
+import TimeLines from './component/TimeLines/TimeLines';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -33,6 +34,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={!user ? <Authentication /> : <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="timelines" element={<TimeLines />} />
             <Route path="statistiques" element={<Statistiques />} />
           </Route>
         </Routes>
@@ -50,9 +52,9 @@ const Layout = ({ handleDrawerToggle, mobileOpen }) => {
         <div className={`left-menu ${mobileOpen ? 'open' : ''}`}>
           <LeftMenu handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />
         </div>
-        <main className="main-content">
-          <Outlet />
-        </main>
+        <div className="main-content">
+          <Outlet className="container"/>
+        </div>
       </div>
     </>
   );

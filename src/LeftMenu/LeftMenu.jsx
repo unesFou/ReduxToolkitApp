@@ -7,6 +7,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import DashboardIcon from '@material-ui/icons/Dashboard';
+import TimerIcon from '@material-ui/icons/Timer';
 import EqualizerIcon from '@material-ui/icons/Equalizer';
 import SettingsIcon from '@material-ui/icons/Settings';
 import Hidden from '@material-ui/core/Hidden';
@@ -23,13 +24,17 @@ const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
         <img src={logo} alt="Gestion de présence Logo" className="w-12 h-8 mx-auto" style={{maxWidth: '25%'}} />
       </div>
       <List >
-        <ListItem button>
+        {/* <ListItem button>
           <ListItemIcon><TimelineIcon /></ListItemIcon>
           <ListItemText primary="Real Time" />
-        </ListItem>
+        </ListItem> */}
         <ListItem button component={Link} to="/dashboard">
           <ListItemIcon><DashboardIcon /></ListItemIcon>
           <ListItemText primary="Dashboard" />
+        </ListItem>
+        <ListItem button component={Link} to="/timelines">
+          <ListItemIcon><TimerIcon /></ListItemIcon>
+          <ListItemText primary="Temps Réels" />
         </ListItem>
         <ListItem button component={Link} to="/statistiques">
           <ListItemIcon><EqualizerIcon /></ListItemIcon>
