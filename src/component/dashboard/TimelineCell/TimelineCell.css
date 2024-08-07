@@ -1,0 +1,14 @@
+.timeline-container {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .timeline-segment {
+    flex: 1;
+    margin: 2px;
+    padding: 4px;
+    border-radius: 4px;
+    color: white;
+    text-align: center;
+  }
+  

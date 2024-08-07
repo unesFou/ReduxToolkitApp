@@ -2,5 +2,6 @@
     .col-xl-2 {
       flex: 0 0 auto;
       width: 25% !important;
+      max-width: 0px !important;
     }
   }

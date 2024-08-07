@@ -33,6 +33,7 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/" element={!user ? <Authentication /> : <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />}>
+          <Route path="/" element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="timelines" element={<TimeLines />} />
             <Route path="statistiques" element={<Statistiques />} />

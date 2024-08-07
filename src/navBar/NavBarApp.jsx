@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { logout } from '../features/authSlice/authSlice';
+import { setSelectedId } from '../features/searchSlice/searchSlice';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -64,6 +65,12 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
 
   const handleSearchInputChange = (event, value) => {
     setSearchValue(value);
+    const selectedOption = data.find(item => item.name === value);
+    if (selectedOption) {
+      dispatch(setSelectedId(selectedOption.id));
+    } else {
+      dispatch(setSelectedId(''));
+    }
   };
 
   const handleDatePickerToggle = () => {
@@ -152,11 +159,12 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
             <Box sx={{ width: 300 }}>
               <Autocomplete
                 freeSolo
-                options={data && data.map((item) => item.name)}
+                options={data || []}
+                getOptionLabel={(option) => option.name}
                 inputValue={searchValue}
                 onInputChange={handleSearchInputChange}
                 renderInput={(params) => (
-                  <TextField
+                  <TextField 
                     {...params}
                     placeholder="Search unité…"
                     variant="outlined"
