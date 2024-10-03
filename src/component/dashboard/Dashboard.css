@@ -5,3 +5,10 @@
       max-width: 0px !important;
     }
   }
+
+  .timeline-container {
+    /* display: flex; */
+    align-items: center;
+    justify-content: center;
+  }
+  

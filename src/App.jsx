@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Provider } from 'react-redux';
-import store from './app/store';
+import {store} from './app/store';
 import { loadUserFromStorage } from './features/authSlice/authSlice';
 import Authentication from './component/Authentication/Authentication';
 import Dashboard from './component/dashboard/Dashboard';

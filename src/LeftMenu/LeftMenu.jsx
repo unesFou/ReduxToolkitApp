@@ -28,11 +28,11 @@ const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
           <ListItemIcon><TimelineIcon /></ListItemIcon>
           <ListItemText primary="Real Time" />
         </ListItem> */}
-        <ListItem button component={Link} to="/dashboard">
+        <ListItem button component={Link} to="/timelines">
           <ListItemIcon><DashboardIcon /></ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem button component={Link} to="/timelines">
+        <ListItem button component={Link} to="/dashboard">
           <ListItemIcon><TimerIcon /></ListItemIcon>
           <ListItemText primary="Temps Réels" />
         </ListItem>

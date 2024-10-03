@@ -4,7 +4,9 @@ import { fetchDashboardData } from './../../features/dashboardSlice/dashboardSli
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import Container from '@mui/material/Container';
-import CircularProgress from '@mui/material/CircularProgress';
+//import CircularProgress from '@mui/material/CircularProgress';
+import { Spinner } from 'react-bootstrap';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -39,14 +41,23 @@ const Statistiques = ({ startDate, endDate }) => {
 
   if (loading)
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Button variant="primary" disabled>
+        <Spinner
+          as="span"
+          animation="grow"
+          size="sm"
+          role="status"
+          aria-hidden="true"
+        />
+        Loading...
+      </Button>
       </div>
     );
 
   if (error)
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
         <div>Error: {error}</div>
       </div>
     );
@@ -145,8 +156,9 @@ const Statistiques = ({ startDate, endDate }) => {
     <Container className="content" style={{ flexGrow: 4, paddingLeft: '0%', paddingTop: '9%' }}>
       <Box sx={{ height: 600, width: '100%' }}>
         <DataGrid
+
           columns={columns}
-          rows={rows}
+          getRowId={(row) => row.id}
           pageSize={5}
           getRowClassName={(params) =>
             params.row.isChild ? 'child-row' : ''

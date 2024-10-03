@@ -63,15 +63,28 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+  // const handleSearchInputChange = (event, value, reason) => {
+  //   setSearchValue(value);
+  //   const selectedOption = data.find(item => item.name === value);
+  //   if (selectedOption) {
+  //     dispatch(setSelectedId(selectedOption.id));
+  //   } else {
+  //     dispatch(setSelectedId(''));
+  //   }
+  // };
   const handleSearchInputChange = (event, value) => {
     setSearchValue(value);
-    const selectedOption = data.find(item => item.name === value);
+  };
+  
+  const handleSearchChange = (event, newValue) => {
+    const selectedOption = data.find(item => item.name === newValue?.name);
     if (selectedOption) {
       dispatch(setSelectedId(selectedOption.id));
     } else {
       dispatch(setSelectedId(''));
     }
   };
+  
 
   const handleDatePickerToggle = () => {
     setShowDatePicker(!showDatePicker);
@@ -124,13 +137,13 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText primary="My Account" />
+          <ListItemText primary="Mon compte" />
         </StyledMenuItem>
         <StyledMenuItem onClick={handleLogout}>
           <ListItemIcon>
             <PowerSettingsNewIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText primary="Logout" />
+          <ListItemText primary="se déconnécter" />
         </StyledMenuItem>
       </StyledMenu>
     </Menu>
@@ -157,28 +170,30 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
           </div>
           <div className="rightSection">
             <Box sx={{ width: 300 }}>
-              <Autocomplete
-                freeSolo
-                options={data || []}
-                getOptionLabel={(option) => option.name}
-                inputValue={searchValue}
-                onInputChange={handleSearchInputChange}
-                renderInput={(params) => (
-                  <TextField 
-                    {...params}
-                    placeholder="Search unité…"
-                    variant="outlined"
-                    InputProps={{
-                      ...params.InputProps,
-                      startAdornment: (
-                        <IconButton aria-label="search">
-                          <SearchIcon />
-                        </IconButton>
-                      ),
-                    }}
-                  />
-                )}
-              />
+            <Autocomplete
+                        freeSolo
+                        options={data || []}
+                        getOptionLabel={(option) => option.name || ""}
+                        inputValue={searchValue}
+                        onInputChange={handleSearchInputChange}  // This just updates the input value
+                        onChange={handleSearchChange}  // This updates the selected option
+                        renderInput={(params) => (
+                          <TextField 
+                            {...params}
+                            placeholder="Search unité…"
+                            variant="outlined"
+                            InputProps={{
+                              ...params.InputProps,
+                              startAdornment: (
+                                <IconButton aria-label="search">
+                                  <SearchIcon />
+                                </IconButton>
+                              ),
+                            }}
+                          />
+                        )}
+                      />
+
             </Box>
             <Button variant="contained" color="primary" onClick={handleDatePickerToggle}>
               Choisir une Date ?

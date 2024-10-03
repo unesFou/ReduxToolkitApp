@@ -1,14 +1,33 @@
-.timeline-container {
+/* .timeline-container {
     display: flex;
     flex-direction: row;
-  }
+  } */
   
-  .timeline-segment {
+  /* .timeline-segment {
     flex: 1;
     margin: 2px;
     padding: 4px;
     border-radius: 4px;
     color: white;
     text-align: center;
+  } */
+  
+  .timeline-container {
+    position: relative;
+    padding: 20px;
+  }
+  
+  .timeline-segment {
+    margin: 5px 0; /* Adjust spacing between segments */
+    position: relative;
+  }
+  
+  .tooltip {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    z-index: 10;
+    transition: display 0.2s ease;
   }
   
