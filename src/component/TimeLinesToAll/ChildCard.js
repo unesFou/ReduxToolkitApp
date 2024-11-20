@@ -4,10 +4,16 @@ import { Card, CardContent, Typography } from '@mui/material';
 const ChildCard = ({ child }) => {
 
   // Calculate the total duration
-  const totalDuration = child?.childs
-    ?.flatMap(e => e?.camera_ids || [])
-    ?.flatMap(camera => camera?.notifications || [])
-    ?.reduce((sum, notification) => sum + (notification?.duration || 0), 0);
+  // const totalDuration = child?.childs
+  //   ?.flatMap(e => e?.camera_ids || [])
+  //   ?.flatMap(camera => camera?.notifications || [])
+  //   ?.reduce((sum, notification) => sum + (notification?.duration || 0), 0);
+
+  const totalDuration =  child?.childs?.flatMap(e => e.childs)
+                         ?.filter(camera => camera?.camera_ids)
+                         .flatMap(c => c?.camera_ids)
+                         .map(n => n?.notifications)
+                         .reduce((sum, notification) => sum + (notification?.duration || 0), 0) 
 
   // Collect all notifications
   const notifications = child?.childs
@@ -38,3 +44,6 @@ const ChildCard = ({ child }) => {
 };
 
 export default ChildCard;
+
+
+

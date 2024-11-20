@@ -13,16 +13,21 @@ import LeftMenu from './LeftMenu/LeftMenu';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './App.css';
-import TimeLines from './component/TimeLines/TimeLines';
+import TimeLinesToAll from './component/TimeLinesToAll/TimeLinesToAll';
 
 const App = () => {
-  const dispatch = useDispatch();
+   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     dispatch(loadUserFromStorage());
   }, [dispatch]);
+  
+  // useEffect(() => {
+  //   console.log('User loaded:', user);
+  // }, [user]);
+  
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -32,10 +37,11 @@ const App = () => {
     <Provider store={store}>
       <Router>
         <Routes>
+        {/* <Route path="/" element={!user ? <Authentication /> : <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />}> */}
           <Route path="/" element={!user ? <Authentication /> : <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />}>
-          <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="timelines" element={<TimeLines />} />
+            <Route path="TimeLinesToAll" element={<TimeLinesToAll />} />
             <Route path="statistiques" element={<Statistiques />} />
           </Route>
         </Routes>

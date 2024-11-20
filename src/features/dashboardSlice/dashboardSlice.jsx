@@ -1,26 +1,24 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async thunk to fetch dashboard data, using cache to avoid redundant API calls
 export const fetchDashboardData = createAsyncThunk(
-  'dashboard/',
+  'dashboard/fetchData',
   async ({ startDate, endDate }, { getState }) => {
     const state = getState().dashboard;
-    
-    // Check if the data for this date range is already cached
     const cachedData = state.cache.find(
       (item) => item.startDate === startDate && item.endDate === endDate
     );
 
     if (cachedData) {
-      // If cached, return the cached data
+      console.log("Data retrieved from cache", cachedData.data);
       return cachedData.data;
     }
     
-    // Otherwise, make the API call
     const response = await axios.post('/api/dashboard', {
       params: { startDate, endDate },
     });
+    console.log("API response:", response.data);
+
     const result = response.data.result;
     return { startDate, endDate, data: JSON.parse(result.replace(/\\"/g, '"')) };
   }
@@ -29,13 +27,14 @@ export const fetchDashboardData = createAsyncThunk(
 const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState: {
-    data: [],       // Data for current view
-    cache: [],      // Cache of previously fetched data
-    loading: false, // Loading state
-    error: null,    // Error state
+    data: [],
+    cache: [],
+    loading: false,
+    error: null,
   },
   reducers: {
     clearCache: (state) => {
+      console.log("Clearing cache");
       state.cache = [];
     },
   },
@@ -47,9 +46,10 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchDashboardData.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload.data;
+        //state.data = action.payload.data;
+        state.data = action.payload;
+       // console.log("Data fetched and stored in state", action.payload);
 
-        // Add the response to the cache
         state.cache.push({
           startDate: action.payload.startDate,
           endDate: action.payload.endDate,

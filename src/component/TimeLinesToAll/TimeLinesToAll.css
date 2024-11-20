@@ -1,0 +1,57 @@
+/* Conteneur principal */
+.timeLinesToAll {
+  display: flex; /* Utiliser Flexbox */
+  justify-content: space-between; /* Espacement entre les éléments */
+  gap: 20px; /* Espace entre les deux sections */
+  width: 100%; /* S'assurer que le conteneur occupe toute la largeur de la page */
+  height: 100vh; /* Prend toute la hauteur de la fenêtre */
+  padding: 20px; /* Optionnel, pour ajouter un peu de padding autour du conteneur */
+  box-sizing: border-box;
+}
+
+/* Conteneur du graphique */
+.chart-container {
+  width: 75%; /* Chaque conteneur occupe 50% de la largeur */
+  background-color: #f4f4f4; /* Fond gris clair pour la section du graphique */
+  padding: 20px;
+  border-radius: 8px; /* Bords arrondis pour un effet plus propre */
+  box-sizing: border-box; /* Pour inclure le padding dans la largeur */
+}
+
+/* Conteneur de la table */
+.table-container {
+  width: 25%; /* Même largeur que la section du graphique */
+  background-color: #fff; /* Fond blanc pour la table */
+  padding: 20px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/* Styles pour les DataGrid et autres éléments si nécessaire */
+.data-grid {
+  height: 100%; /* S'assurer que la grille occupe toute la hauteur de son conteneur */
+}
+
+/* Styles responsive */
+@media (max-width: 768px) {
+  .timeLinesToAll {
+      flex-direction: column; /* Passe la disposition en colonne pour les petits écrans */
+      gap: 10px; /* Réduit l'espace entre les éléments */
+  }
+
+  .chart-container, .table-container {
+      width: 100%; /* Les sections prennent toute la largeur sur les petits écrans */
+  }
+}
+
+  .chart-container,
+    .table-container {
+      flex: 1; /* Each takes 50% of the width */
+      overflow: auto; /* Add scrolling if content overflows */
+    }
+  
+  .chart-container {
+    padding: 20px;
+  }
+  
+  

@@ -21,6 +21,7 @@ const Authentication = () => {
 
   const dispatch = useDispatch();
   const {user, loading, error } = useSelector((state) => state.auth);
+  console.log('Auth state:', { user, loading, error });
 
   const handleLogin = (e) => {
     e.preventDefault();
