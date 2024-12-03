@@ -3,24 +3,28 @@ import axios from 'axios';
 
 export const fetchDashboardData = createAsyncThunk(
   'dashboard/fetchData',
-  async ({ startDate, endDate }, { getState }) => {
+  async ({ date_start, date_end }, { getState }) => {
     const state = getState().dashboard;
     const cachedData = state.cache.find(
-      (item) => item.startDate === startDate && item.endDate === endDate
+      (item) => item.date_start === date_start && item.date_end === date_end
     );
 
     if (cachedData) {
       console.log("Data retrieved from cache", cachedData.data);
       return cachedData.data;
     }
+    // if(response.data.error.code == 200){
+    //   console.log('Erreur en odoo',response.data.error.message);
+    //   return;
+    // }
     
     const response = await axios.post('/api/dashboard', {
-      params: { startDate, endDate },
+      params: { date_start , date_end },
     });
-    console.log("API response:", response.data);
+    console.log("API Dashboard response:", response.data);
 
     const result = response.data.result;
-    return { startDate, endDate, data: JSON.parse(result.replace(/\\"/g, '"')) };
+    return { date_start, date_end, data: JSON.parse(result.replace(/\\"/g, '"')) };
   }
 );
 

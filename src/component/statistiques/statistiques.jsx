@@ -11,15 +11,19 @@ import IconButton from '@mui/material/IconButton';
 import ChartIcon from '@mui/icons-material/BarChart';
 import ImageIcon from '@mui/icons-material/Image';
 import Typography from '@mui/material/Typography';
+import SingleLineImageList from './SingleLineImageList/SingleLineImageList';
 import './statistiques.css';
-//import './popup.css';
 
 export default function MultiActionAreaCard() {
-  const { data, loading, error } = useSelector((state) => state.dashboard);
+  const { data: rawData, loading, error } = useSelector((state) => state.dashboard);
+
+  const data = Array.isArray(rawData?.data) ? rawData.data : rawData; // Vérification de la structure
 
   const [open, setOpen] = useState(false);
   const [childs, setChilds] = useState([]);
   const [subChilds, setSubChilds] = useState([]);
+  const [imagePopupOpen, setImagePopupOpen] = useState(false);
+  const [imagePopupData, setImagePopupData] = useState([]);
 
   const handleOpen = (childs) => {
     setChilds(childs);
@@ -27,11 +31,20 @@ export default function MultiActionAreaCard() {
   };
 
   const handleClose = () => {
-    setOpen(false); // Seulement fermer le popup sans réinitialiser subChilds
+    setOpen(false);
   };
 
   const handleDetail = (child) => {
-    setSubChilds(child.childs || []); // Afficher les sous-enfants
+    setSubChilds(child.childs || []);
+  };
+
+  const handleImagePopupOpen = (images) => {
+    setImagePopupData(images || []); // Récupération des données à afficher
+    setImagePopupOpen(true);
+  };
+
+  const handleImagePopupClose = () => {
+    setImagePopupOpen(false);
   };
 
   if (loading) {
@@ -62,7 +75,6 @@ export default function MultiActionAreaCard() {
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle>Liste des Compagnies</DialogTitle>
         <DialogContent>
-          {/* Liste principale */}
           <List>
             {childs.map((child, index) => (
               <ListItem key={index} className="list-item">
@@ -84,32 +96,48 @@ export default function MultiActionAreaCard() {
         </Button>
       </Dialog>
 
-      {/* Liste des brigades affichée en dehors du Dialog */}
       {subChilds.length > 0 && (
-        <div className="sub-list"  style={{border:'1px solid #ddd'}}>
-          <div style={{alignItems:'center'}}>
-          <Typography variant="h6" >Liste des Brigades</Typography>
+        <div className="sub-list" style={{ border: '1px solid #ddd' }}>
+          <div style={{ alignItems: 'center' }}>
+            <Typography variant="h6">Liste des Brigades</Typography>
           </div>
           <List>
-              {subChilds.map((subChild, index) => (
-                <ListItem key={index} className="sub-list-item">
-                  <div className="card-item">
-                    <ListItemText primary={subChild.name} className="list-item-text" />
-                    <div className="icon-buttons">
-                      <IconButton>
-                        <ChartIcon />
-                      </IconButton>
-                      <IconButton>
-                        <ImageIcon />
-                      </IconButton>
-                    </div>
+            {subChilds.map((subChild, index) => (
+              <ListItem key={index} className="sub-list-item">
+                <div className="card-item">
+                  <ListItemText primary={subChild.name} className="list-item-text" />
+                  <div className="icon-buttons">
+                    <Button variant="contained" color="success">
+                      {subChild.presence_rate}%
+                    </Button>
+                    <IconButton>
+                      <ChartIcon />
+                    </IconButton>
+                    <IconButton>
+                      <ImageIcon onClick={() => handleImagePopupOpen(subChild.images)} />
+                    </IconButton>
                   </div>
-                </ListItem>
-              ))}
-            </List>
-
+                </div>
+              </ListItem>
+            ))}
+          </List>
         </div>
       )}
+
+      <Dialog
+        open={imagePopupOpen}
+        onClose={handleImagePopupClose}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogTitle>Images</DialogTitle>
+        <DialogContent>
+          <SingleLineImageList images={imagePopupData} />
+        </DialogContent>
+        <Button onClick={handleImagePopupClose} style={{ margin: '10px' }}>
+          Fermer
+        </Button>
+      </Dialog>
     </>
   );
 }

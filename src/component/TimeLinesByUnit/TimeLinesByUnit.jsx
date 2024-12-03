@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTimelineData } from '../../features/timelineSlice/timelineSlice';
 import ApexChart from 'react-apexcharts';
 import { CircularProgress } from '@mui/material';
 import ChildCard from './ChildCard';
@@ -9,119 +8,109 @@ const TimeLinesByUnit = ({ allData, date_start, date_end }) => {
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector((state) => state.timeline);
 
-  const hasFetchedIds = useRef(new Set());
-  const [formattedData, setFormattedData] = useState([]);
-  const [dataToCard , setDataToCard] = useState({});
-
-  const parseDurationToMinutes = (durationString) => {
-    const [hours, minutes, seconds] = durationString.split(':').map(Number);
-    return hours * 60 + minutes + seconds / 60;
-  };
-
-  const convertMinutesToTime = (totalMinutes) => {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = Math.floor(totalMinutes % 60);
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
-  };
+  const [chartData, setChartData] = useState([]);
+  const [dataToCard, setDataToCard] = useState([]);
+  const [selectedChild, setSelectedChild] = useState(null); // Etat pour l'enfant sélectionné
 
   useEffect(() => {
-    // Récupérer les IDs des enfants
-    const childIds = allData?.childs
-      ?.flatMap(child => child?.childs?.map(childChild => childChild?.id))
-      .filter(Boolean)
-      .filter(id => !hasFetchedIds.current.has(id));
-
-    // Envoyer une action pour chaque ID non encore récupéré
-    childIds.forEach(id => {
-      hasFetchedIds.current.add(id);
-      dispatch(fetchTimelineData({ bt_id: id, date_start, date_end }));
-    });
-  }, [allData, date_start, date_end, dispatch]);
-
-  useEffect(() => {
-    if (!loading && data.notifs.length > 0) {
-      console.log('Data from Redux:', data);
-
-      // Accumulation des données récupérées
-      const aggregatedData = data.notifs.reduce((acc, notif) => {
-        const id = notif.unite_id;
-        const duration = parseDurationToMinutes(notif.duration || '0:00:00');
-        if (acc[id]) {
-          acc[id].totalDuration += duration;
-        } else {
-          acc[id] = { totalDuration: duration, unite_id: id };
-        }
-        return acc;
-      }, {});
-
-      console.log('Aggregated Data:', aggregatedData);
-
-      // Formatage des données agrégées
-      const newFormattedData = Object.values(aggregatedData)
-        .map(({ unite_id, totalDuration }) => {
-          const formattedDuration = convertMinutesToTime(totalDuration);
-          const correspondingChild = allData?.childs
-            ?.flatMap(child => child?.childs)
-            ?.find(childChild => childChild?.id === unite_id);
-
-          return {
-            id: unite_id,
-            name: correspondingChild?.name || 'Unknown',
-            durationSum: formattedDuration,
-          };
-        })
-        .filter(item => item.durationSum !== '00:00:00');
-
-      console.log('Formatted Data:', newFormattedData);
-
-      // Mise à jour de l'état avec les nouvelles données (sans écrasement)
-      setFormattedData((prevData) => [...prevData, ...newFormattedData]);
+    if (allData) {
+      const childData = allData?.childs?.flatMap(child =>
+        child?.childs?.map(childChild => ({
+          name: childChild?.name,
+          absence_duration: childChild?.abs_duration,
+          presence_rate: childChild?.presence_rate,
+        }))
+      ).filter(child => child.name && child.absence_duration);
+  
+      // Trier les données par durée d'absence (par ordre décroissant ici)
+      const sortedChildData = childData.sort((a, b) => b.absence_duration - a.absence_duration);
+  
+      const formattedChartData = sortedChildData.map(child => ({
+        name: child.name,
+        absence_duration: child.absence_duration,
+        presence_rate: child.presence_rate,
+      }));
+  
+      setChartData(formattedChartData);
+      setDataToCard(sortedChildData);
     }
-  }, [loading, data, allData]);
+  }, [allData]);
+  
+  // Fonction pour gérer le clic sur le graphique
+  const handleChartClick = (event, chartContext, config) => {
+    const selectedName = chartData[config.dataPointIndex].name;  // Nom du child sélectionné
+    const selectedAbsenceDuration = chartData[config.dataPointIndex].absence_duration;
+    const selectedPresenteRate = chartData[config.dataPointIndex].presence_rate;
+    
+    
 
-  // Préparer les données pour ApexCharts
-  const seriesData = formattedData.map(item => parseDurationToMinutes(item.durationSum)); // Durée sous forme de minutes
-  const categoriesData = formattedData.map(item => item.name); // Noms des unités
+    // Trouver le child dans les données des cartes
+    const selectedChild = dataToCard.find(child => child.name === selectedName && child.absence_duration === selectedAbsenceDuration 
+                                                  );
+
+    setSelectedChild(selectedChild);  // Mettre à jour l'état avec le child sélectionné
+  };
+
+  const options = {
+    chart: {
+      type: 'bar',
+      height: 350,
+      events: {
+        dataPointSelection: handleChartClick,  // Lier l'événement de clic du graphique
+      }
+    },
+    plotOptions: {
+      bar: {
+        horizontal: true,
+      },
+    },
+    xaxis: {
+      categories: chartData.map(data => data.name),
+    },
+    yaxis: {
+      title: {
+        // text: 'Absence Duration (minutes)',
+      },
+    },
+    title: {
+      text: 'Absence Duration Brigade',
+      align: 'center',
+    },
+  };
+
+  const series = [{
+    name: 'Absence Duration',
+    data: chartData.map(data => data.absence_duration),
+  }];
+
+  if (loading) {
+    return <CircularProgress />;
+  }
 
   if (error) {
-    return <div>Error: {error.message || 'Something went wrong!'}</div>;
+    return <div>Error loading data</div>;
   }
 
   return (
-    <div style={{ display: 'flex', gap: '20px' }}>
-      <div style={{ flex: 0.75 }}>
-        {loading && <CircularProgress />}
-        {formattedData.length > 0 && (
-          <ApexChart
-            type="bar"
-            series={[{ name: 'Duration', data: seriesData }]} // Envoie toutes les données
-            options={{
-              chart: {
-                type: 'bar',
-                events: {
-                  click: (event, chartContext, { dataPointIndex }) => {
-                    const clickedChild = formattedData[dataPointIndex];
-                    if (clickedChild) {
-                      console.log(clickedChild);
-                      setDataToCard(clickedChild)
-                    }
-                  },
-                },
-              },
-              plotOptions: { bar: { horizontal: true } },
-              xaxis: {
-                categories: categoriesData, // Envoie toutes les catégories
-                title: { text: 'Duration (HH:MM:SS)' },
-              },
-              tooltip: {
-                y: { formatter: (val) => `${val.toFixed(2)} minutes` },
-              },
-            }}
-          />
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
+      {/* Graphique à gauche */}
+      <div style={{ flex: 3, minWidth: '60%' }}>
+        {chartData.length > 0 ? (
+          <ApexChart options={options} series={series} type="bar" height={350} />
+        ) : (
+          <div>Aucune absence trouvée</div>
         )}
       </div>
-      <div style={{ flex: 0.25 }}>
-        <ChildCard dataToCard={dataToCard} child={allData} />
+
+      {/* Cartes à droite */}
+      <div style={{ flex: 1, minWidth: '30%' }}>
+        {dataToCard.map((child, index) => (
+          <ChildCard
+            key={index}
+            child={child}
+            isSelected={selectedChild && selectedChild.name === child.name} // Passer une prop indiquant si la carte est sélectionnée
+          />
+        ))}
       </div>
     </div>
   );

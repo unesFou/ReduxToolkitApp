@@ -20,92 +20,107 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector((state) => state.dashboard);
   
+  // Définir une variable pour gérer les données réelles
+  const dashboardData = data?.data || data;
+  
   const [rows, setRows] = useState([]);
   const [loadingRows, setLoadingRows] = useState({});
   const [open, setOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const getStartDate = () => {
     const today = new Date();
+    //today.setMonth(today.getMonth() - 5);
     today.setHours(8, 0, 0, 0);
     return today.toISOString().slice(0, 16);
   };
 
   const getEndDate = () => {
     const today = new Date();
+    //today.setMonth(today.getMonth() - 5);
     today.setHours(23, 59, 0, 0);
     return today.toISOString().slice(0, 16);
   };
 
   useEffect(() => {
-    if (data) {
-      //console.log('Fetched data:', data);
-      calculateAllAbsenceDurations(data);
-    }
-  }, [data]);
-  
-
-  useEffect(() => {
     const start = getStartDate();
     const end = getEndDate();
-    dispatch(fetchDashboardData({ startDate: start, endDate: end }));
+    dispatch(fetchDashboardData({date_start : start, date_end: end }));
   }, [dispatch]);
 
-  const parseDurationToMinutes = (durationString) => {
-    if (!durationString) return 0;
-    const [hours, minutes, seconds] = durationString.split(':').map(Number);
-    return hours * 60 + minutes + seconds / 60;
-  };
-  
-  const calculateAbsenceDuration = (relevantData) => {
-    const totalAbsenceDuration = relevantData?.childs
-      ?.filter(e => e.childs !== undefined)
-      ?.flatMap(e => e.childs)
-      ?.filter(e => e?.camera_ids)
-      ?.flatMap(e => e?.camera_ids)
-      ?.flatMap(e => e?.notifications)
-      .reduce((acc, notification) => {
-        const durationInMinutes = parseDurationToMinutes(notification.duration || '0:00:00');
-        return acc + durationInMinutes;
-      }, 0);
-  
-    return totalAbsenceDuration;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000); // Mettre à jour l'heure toutes les secondes
+
+    return () => clearInterval(interval); // Nettoyer l'intervalle lorsque le composant est démonté
+  }, []);
+
+  const formatTime = (date) => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
   };
 
-  // const calculateAbsenceDuration = (relevantData) => {
-  //   // Traverse the nested structure to access the duration in notifications
-  //   const totalAbsenceDuration = relevantData?.childs
+  // const parseDurationToMinutes = (durationString) => {
+  //   if (!durationString) return 0;
+  //   const [hours, minutes, seconds] = durationString.split(':').map(Number);
+  //   return hours * 60 + minutes + seconds / 60;
+  // };
+  
+  // const calculateAbsenceDuration = (data) => {
+  //   console.log("data to calculate totalAbsenceDuration", data)
+  //   const totalAbsenceDuration = data?.childs
   //     ?.filter(e => e.childs !== undefined)
   //     ?.flatMap(e => e.childs)
   //     ?.filter(e => e?.camera_ids)
   //     ?.flatMap(e => e?.camera_ids)
   //     ?.flatMap(e => e?.notifications)
-  //     .reduce((acc, notification) => acc + (notification.duration || 0), 0); // Summing up durations
-
-  //   return totalAbsenceDuration; // Returning total absence duration in days format
+  //     .reduce((acc, notification) => {
+  //       const durationInMinutes = parseDurationToMinutes(notification.duration || '0:00:00');
+  //       return acc + durationInMinutes;
+  //     }, 0);
+  
+  //   return totalAbsenceDuration;
   // };
 
+  const convertSecondsToTimeFormat = (seconds) => {
+    const hours = Math.floor(seconds / 3600); // Nombre d'heures
+    const minutes = Math.floor((seconds % 3600) / 60); // Nombre de minutes restantes
+    const remainingSeconds = seconds % 60; // Reste des secondes
+    
+    // Formatage en 'hh:mm:ss' avec des zéros devant si nécessaire
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  };
+  
   const calculateAllAbsenceDurations = async (data) => {
+    console.log('data dashboard',data);
     const calculatedRows = await Promise.all(
       data.map(async (item) => {
-        const absenceDuration = await calculateAbsenceDuration(item);
+        // Convertir la durée d'absence en secondes au format hh:mm:ss
+        const absenceDuration = convertSecondsToTimeFormat(item.abs_duration);
+  
         return {
           id: item.id,
           name: item.name,
           presence_rate: item.presence_rate,
-          absence_duration: `${absenceDuration} heure(s)`,
+          absence_duration: absenceDuration, // Affiche la durée sous format hh:mm:ss
           relevantData: item,
         };
       })
     );
+    //calculatedRows.sort((a, b) => a.absence_duration_in_seconds - b.absence_duration_in_seconds);
     setRows(calculatedRows);
   };
+  
 
-  // useEffect(() => {
-  //   if (data) {
-  //     calculateAllAbsenceDurations(data);
-  //   }
-  // }, [data]);
+  useEffect(() => {
+    if (dashboardData) {
+      calculateAllAbsenceDurations(dashboardData);
+    }
+  }, [dashboardData]);
 
   const handleRowClick = (params) => {
     setLoadingRows((prev) => ({ ...prev, [params.row.id]: true }));
@@ -130,7 +145,7 @@ const Dashboard = () => {
         return isLoading ? (
           <ThreeDot color="#32cd32" size="small" />
         ) : (
-          <TimelineCell relevantData={params.row.relevantData} />
+          <TimelineCell relevantData={params.row.relevantData.abs_duration} />
         );
       },
     },
@@ -139,8 +154,18 @@ const Dashboard = () => {
 
   return (
     <Container>
+      <Row className="text-center" style={{ marginBottom: '20px' }}>
+        <h1>Total d'absence du 08h jusqu'à <span style={{ fontWeight: 'bold' }}>{formatTime(currentTime)}</span></h1>
+      </Row>
       <Row>
-        <DataGrid rows={rows} columns={columns} pageSize={10} onRowClick={handleRowClick} />
+          <div style={{padding:'1%'}}>
+        <DataGrid rows={rows} columns={columns} pageSize={10} onRowClick={handleRowClick}  
+        initialState={{
+                        sorting: {
+                          sortModel: [{ field: 'absence_duration', sort: 'desc' }],
+                        },
+  }}/>
+          </div>
       </Row>
 
       <Dialog
@@ -168,7 +193,7 @@ const Dashboard = () => {
           {selectedRowData && (
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 0' }}>
-              <div style={{ flex: 1.5, marginRight: '10px' }}>
+                <div style={{ flex: 1.5, marginRight: '10px' }}>
                   <Card sx={{ padding: '16px', borderRadius: '8px', boxShadow: 3 }}>
                     <p style={{ margin: 0, fontWeight: 'bold', fontSize: '18px', color: '#00796b' }}>
                       {selectedRowData.name}
@@ -220,8 +245,8 @@ const Dashboard = () => {
         </DialogActions>
       </Dialog>
 
-      {loading && <CircularProgress />}
-      {error && <div>Error fetching data: {error}</div>}
+      {/* {loading && <CircularProgress />}
+      {error && <div>Error fetching data: {error}</div>} */}
     </Container>
   );
 };

@@ -7,8 +7,10 @@ import { loadUserFromStorage } from './features/authSlice/authSlice';
 import Authentication from './component/Authentication/Authentication';
 import Dashboard from './component/dashboard/Dashboard';
 import Statistiques from './component/statistiques/statistiques';
+import Historique from './component/historique/historique';
 import NavBarApp from './navBar/NavBarApp';
 import LeftMenu from './LeftMenu/LeftMenu';
+import Profil from './component/profil/Profil';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -43,6 +45,8 @@ const App = () => {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="TimeLinesToAll" element={<TimeLinesToAll />} />
             <Route path="statistiques" element={<Statistiques />} />
+            <Route path="historique" element={<Historique />} />
+            <Route path="profil" element={<Profil />} />
           </Route>
         </Routes>
       </Router>

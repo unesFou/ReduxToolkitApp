@@ -1,43 +1,26 @@
-import React from 'react';
-import './TimelineCell.css';
+import React from "react";
+import { Progress } from "react-sweet-progress";
+import "react-sweet-progress/lib/style.css";
 
 const TimelineCell = ({ relevantData }) => {
-  // Vérification de la validité des données
-  if (!Array.isArray(relevantData?.childs)) {
-    console.error('Relevant data is not an array', relevantData);
-    return null;
-  }
 
-  // Calcul de la durée totale de toutes les notifications
-  const totalDuration = relevantData.childs
-    .flatMap(child => child.childs || [])
-    .flatMap(e => e?.notifications || [])
-    .reduce((sum, notif) => sum + (notif?.duration || 0), 0) || 0;
+  // Conversion des secondes en format 'hh:mm:ss'
+  // const convertSecondsToTimeFormat = (seconds) => {
+  //   const hours = Math.floor(seconds / 3600); // Nombre d'heures
+  //   const minutes = Math.floor((seconds % 3600) / 60); // Nombre de minutes restantes
+  //   const remainingSeconds = seconds % 60; // Reste des secondes
+    
+  //   // Formatage en 'hh:mm:ss' avec des zéros devant si nécessaire
+  //   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  // };
 
+  // Calcul du pourcentage de progression
+ // const progressPercent = (relevantData / (360000 / 2)) * 100; // 360000 secondes correspond à 100 heures
+  const progressPercent = (relevantData / 180000 ) * 100; // 360000 secondes correspond à 50 heures
   return (
-    <div className="timeline-container">
-      {relevantData.childs.map((child, index) => {
-        // Calcul de la durée pour chaque enfant (child)
-        const childDuration = child.childs
-          ?.flatMap(e => e?.camera_ids || [])  // Vérifiez si camera_ids est la bonne source de données
-          .filter(e => e !== undefined)
-          .reduce((sum, notif) => sum + (notif?.duration || 0), 0) || 0;
-
-        // Définir la couleur de la ligne en fonction de la durée de l'enfant
-        const lineColor = childDuration > 0 ? '#f7a7a7' : '#7af7a7';  // Si la durée est > 0, rouge, sinon vert
-
-        return (
-          <div key={index} className="timeline-segment" style={{ backgroundColor: lineColor, height: '5px' }}>
-            {/* La largeur de la ligne est proportionnelle à la durée de l'enfant par rapport à la durée totale */}
-            <div style={{ width: `${(childDuration / totalDuration) * 100}%`, backgroundColor: lineColor }} />
-          </div>
-        );
-      })}
-
-      {/* Affichage de la durée totale */}
-      <div className="total-duration" style={{ marginTop: '10px', fontSize: '14px', color: '#333' }}>
-        Total Duration: {totalDuration} min
-      </div>
+    <div className="timeline-container" style={{ margin: "20px" }}>
+      {/* Barre de progression pour la durée totale */}
+      <Progress status="error" percent={Math.min(progressPercent, 100)} />
     </div>
   );
 };

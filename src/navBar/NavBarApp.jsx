@@ -77,7 +77,7 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
   };
   
   const handleSearchChange = (event, newValue) => {
-    const selectedOption = data.find(item => item.name === newValue?.name);
+    const selectedOption = (Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []).find(item => item.name === newValue?.name);
     if (selectedOption) {
       dispatch(setSelectedId(selectedOption.id));
     } else {
@@ -169,32 +169,33 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
             </Hidden>
           </div>
           <div className="rightSection">
-            <Box sx={{ width: 300 }}>
+          <Box sx={{ width: 300 }}>
             <Autocomplete
-                        freeSolo
-                        options={data || []}
-                        getOptionLabel={(option) => option.name || ""}
-                        inputValue={searchValue}
-                        onInputChange={handleSearchInputChange}  // This just updates the input value
-                        onChange={handleSearchChange}  // This updates the selected option
-                        renderInput={(params) => (
-                          <TextField 
-                            {...params}
-                            placeholder="Search unité…"
-                            variant="outlined"
-                            InputProps={{
-                              ...params.InputProps,
-                              startAdornment: (
-                                <IconButton aria-label="search">
-                                  <SearchIcon />
-                                </IconButton>
-                              ),
-                            }}
-                          />
-                        )}
-                      />
+              freeSolo
+              options={Array.isArray(data?.data) ? data.data : []} // Vérifie si data.data est un tableau
+              getOptionLabel={(option) => option.name || ''} // Gère les cas où name est absent
+              inputValue={searchValue}
+              onInputChange={handleSearchInputChange}  // Met à jour l'entrée
+              onChange={handleSearchChange}  // Met à jour l'option sélectionnée
+              renderInput={(params) => (
+                <TextField 
+                  {...params}
+                  placeholder="Search unité…"
+                  variant="outlined"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <IconButton aria-label="search">
+                        <SearchIcon />
+                      </IconButton>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </Box>
 
-            </Box>
+
             <Button variant="contained" color="primary" onClick={handleDatePickerToggle}>
               Choisir une Date ?
             </Button>

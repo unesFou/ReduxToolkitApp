@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from '@mui/material/Alert';
 import { login } from '../../features/authSlice/authSlice';
+import image from './../../images/back.jpg';
 import {
   Button,
   Container,
@@ -30,7 +31,8 @@ const Authentication = () => {
   };
 
   return (
-    <Container className='Authentication'>
+    <div style={{backgroundImage: `url(${image})`, backgroundSize: 'cover'}}>
+    <Container className='Authentication' >
       <header className='Authentication-header'>
               {loading && <CircularProgress />}
               {user && <Alert severity="success">Authentification avec succés</Alert>}
@@ -89,6 +91,7 @@ const Authentication = () => {
         </Card>
       </header>
     </Container>
+    </div>
   );
 };
 

@@ -56,6 +56,7 @@ export const fetchTimelineData = createAsyncThunk(
       const data_n = data.result;
       const parsedData = JSON.parse(data_n.replace(/\\"/g, '"'));
 
+
       // Retourner les données et les paramètres pour les ajouter au cache
       return { bt_id, date_start, date_end, data: parsedData };
     } catch (error) {
@@ -64,29 +65,6 @@ export const fetchTimelineData = createAsyncThunk(
     }
   }
 );
-
-// Thunk to fetch timeline data using the fetchDataNotif service
-// export const fetchTimelineData = createAsyncThunk(
-//   'timeline/fetchData',
-//   async ({ bt_id, date_start, date_end }, { rejectWithValue }) => {
-//     try {
-//       // Call fetchDataNotif service
-//       const data = await fetchDataNotif(bt_id, date_start, date_end);
-      
-//       // Check for valid JSON response
-//       if (!data || typeof data !== 'object') {
-//         throw new Error('Invalid response format');
-//       }
-//       const data_n = data.result;
-      
-//       return JSON.parse(data_n.replace(/\\"/g, '"')) ;
-//       //return JSON.parse(data.result.replace(/\\"/g, '"')) ;
-//     } catch (error) {
-//       console.error('Error fetching timeline data:', error);
-//       return rejectWithValue(error.response?.data || error.message);
-//     }
-//   }
-// );
 
 const timelineSlice = createSlice({
   name: 'timeline',
@@ -110,7 +88,9 @@ const timelineSlice = createSlice({
 
           // Ajouter les données récupérées au cache
           const { bt_id, date_start, date_end, data } = action.payload;
-          state.cache?.push({ bt_id, date_start, date_end, data });
+          if(action?.payload?.data?.notifs?.length){
+            state.cache?.push({ bt_id, date_start, date_end, data });
+          }
 
           // Mettre à jour `state.data` avec les nouvelles données
           state.data = data;
