@@ -12,7 +12,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
+//import Button from '@mui/material/Button';
+import Button from 'react-bootstrap/Button';
 import { Card } from '@mui/material';
 import './Dashboard.css';
 
@@ -135,7 +136,17 @@ const Dashboard = () => {
   };
 
   const columns = [
-    { field: 'name', headerName: 'Name', width: 300 },
+     { field: 'name', headerName: 'Name', width: 300 },
+    // {
+    //   field: 'name',
+    //   headerName: 'Région',
+    //   width: 200,
+    //   renderCell: (params) => (
+    //     <Button variant="light" style={{textAlign:'center'}}>
+    //       {params.row.name}
+    //     </Button>
+    //   ),
+    // },
     {
       field: 'timeline',
       headerName: 'Timeline',
@@ -149,7 +160,16 @@ const Dashboard = () => {
         );
       },
     },
-    { field: 'absence_duration', headerName: 'Absence Duration', width: 200 },
+    {
+      field: 'absence_duration',
+      headerName: 'Absence Duration',
+      width: 200,
+      renderCell: (params) => (
+        <Button variant="outline-warning" color="warning" style={{textAlign:'center'}}>
+          {params.row.absence_duration}
+        </Button>
+      ),
+    },
   ];
 
   return (

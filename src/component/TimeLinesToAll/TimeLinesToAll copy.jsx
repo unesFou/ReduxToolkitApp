@@ -1,30 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDashboardData } from './../../features/dashboardSlice/dashboardSlice';
 import ApexChart from 'react-apexcharts';
+import { fetchDashboardData } from './../../features/dashboardSlice/dashboardSlice';
+import { fetchTimelineData } from './../../features/timelineSlice/timelineSlice';
+import TimeLineChart from './TimeLineChart/TimeLineChart';
 import './TimeLinesToAll.css';
 
 const TimeLinesToAll = () => {
   const dispatch = useDispatch();
   const { data: rawData, loading, error } = useSelector((state) => state.dashboard);
+  const { data: notifData } = useSelector((state) => state.timeline);
 
   const [data, setData] = useState([]);
-  const [selectedParent, setSelectedParent] = useState(null);
-  const [chartData, setChartData] = useState({
-    series: [{ name: '', data: [] }],
-    options: {
-      chart: { type: 'bar', height: 350 },
-      plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
-      xaxis: { categories: [] },
-      title: { text: 'Child Notifications', align: 'center' },
-    },
-  });
-
-  const tableColumns = [
-    { field: 'name', headerName: 'Région', width: 150 },
-    { field: 'notifications', headerName: 'Nombre Notifications', width: 250 },
-  ];
+  const [childRows, setChildRows] = useState([]);
+  const [grandChildRows, setGrandChildRows] = useState([]);
+  const [thirdGridRows, setThirdGridRows] = useState([]);
 
   useEffect(() => {
     const start = new Date();
@@ -35,55 +26,116 @@ const TimeLinesToAll = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Gestion de la structure des données
     if (rawData) {
       const normalizedData = Array.isArray(rawData) ? rawData : rawData.data || [];
       setData(normalizedData);
     }
   }, [rawData]);
 
+  const parentTableColumns = [
+    { field: 'name', headerName: 'Région', width: 150 },
+    { field: 'notifications', headerName: 'Nombre Notifications', width: 250 },
+  ];
+
+  const childTableColumns = [
+    { field: 'name', headerName: 'Compagnie', width: 150 },
+    { field: 'notifications', headerName: 'Notifications', width: 150 },
+  ];
+
+  const grandChildColumns = [
+    { field: 'name', headerName: 'Nom du Child', width: 150 },
+    { field: 'notifications', headerName: 'Nombre Notifications', width: 150 },
+  ];
+
+  const thirdGridColumns = [
+    { field: 'name', headerName: 'Brigade', width: 150 },
+    {
+      field: 'chart',
+      headerName: 'Notifications en Temps Réel',
+      minWidth: 750,
+      renderCell: (params) => (
+        <div>
+          {/* Le graphique TimeLineChart ici */}
+          <TimeLineChart grandChild={params.row} />
+        </div>
+      ),
+    },
+  ];
+
   const handleRowClick = (params) => {
     const parent = data.find((p) => p.id === params.row.id);
     if (!parent || !parent.childs) return;
 
-    const children = parent.childs.flatMap((child) => [child, ...(child.childs || [])]);
-
-    const chartSeries = children.map((child) => {
-      const totalNotifications = child.camera_ids?.reduce((total, camera) => {
+    const children = parent.childs.map((child) => ({
+      id: child.id,
+      name: child.name,
+      notifications: child.camera_ids?.reduce((total, camera) => {
         return total + (camera.notifications?.length || 0);
-      }, 0);
+      }, 0) || 0,
+      childs: child.childs,
+    }));
 
-      return {
-        name: child.name,
-        data: [totalNotifications || 0],
-      };
-    });
-
-    setSelectedParent(parent);
-    setChartData({
-      series: chartSeries,
-      options: {
-        ...chartData.options,
-        xaxis: {
-          categories: [parent.name, ...children.map((child) => child.name)],
-          labels: {
-            style: {
-              fontWeight: (val) => (val === parent.name ? 'bold' : 'normal'),
-            },
-          },
-        },
-        title: { text: `Notifications pour les unités de la ${parent.name}`, align: 'center' },
-      },
-    });
+    setChildRows(children);
+    setGrandChildRows([]);
+    setThirdGridRows([]);
   };
 
-  if (loading) return <Commet color="#32cd32" size="medium" text="" textColor="" />;
-  if (error) return <div>Error loading data</div>;
+  const handleChildRowClick = async (params) => {
+    const child = childRows.find((c) => c.id === params.row.id);
+    if (!child || !child.childs) return;
+
+    const grandChildIds = child.childs.map((grandChild) => grandChild.id);
+
+    const start = new Date();
+    start.setHours(8, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 0, 0);
+
+    try {
+      const results = await Promise.all(
+        grandChildIds.map((id) =>
+          dispatch(fetchTimelineData({
+            bt_id: id,
+            date_start: start.toISOString().slice(0, 16),
+            date_end: end.toISOString().slice(0, 16),
+          }))
+        )
+      );
+
+      const grandChildren = child.childs.map((grandChild, index) => ({
+        id: grandChild.id,
+        name: grandChild.name,
+        notifications: results,
+       // notifications: results[index]?.payload?.notifications || 0,
+      }));
+
+      setGrandChildRows(grandChildren);
+
+      const thirdGridData = grandChildren.map((grandChild) => ({
+        id: grandChild.id,
+        name: grandChild.name,
+        dataChart : grandChild.notifications[0]?.payload?.notifs,
+        chart: <TimeLineChart grandChild={grandChild.notifications[0]?.payload?.notifs} />,
+      }));
+
+      setThirdGridRows(thirdGridData);
+    } catch (error) {
+      console.error('Error fetching notification data:', error);
+    }
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) {
+    console.log('error', error);
+    return <div>Error loading data</div>;
+  }
+
   if (!data || data.length === 0) return <div>No data available</div>;
 
   return (
     <div className="timeLinesToAll">
       <div className="table-container">
+        <h2>Tableau des Régions</h2>
         <DataGrid
           className="data-grid"
           rows={data.map((parent) => ({
@@ -91,18 +143,38 @@ const TimeLinesToAll = () => {
             name: parent.name,
             notifications: parent.totalNotifications || 0,
           }))}
-          columns={tableColumns}
+          columns={parentTableColumns}
           pageSize={5}
           onRowClick={handleRowClick}
         />
       </div>
-      <div className="chart-container">
-        {chartData.series.length > 0 ? (
-          <ApexChart options={chartData.options} series={chartData.series} type="bar" width="100%" height="100%" />
-        ) : (
-          <div>Cliquez Sur une Région ... </div>
-        )}
-      </div>
+
+      {childRows.length > 0 && (
+        <div className="table-container">
+          <h3>Détails par Compangines</h3>
+          <DataGrid
+            className="data-grid"
+            rows={childRows}
+            columns={childTableColumns}
+            pageSize={5}
+            onRowClick={handleChildRowClick}
+          />
+        </div>
+      )}
+
+      {thirdGridRows.length > 0 && (
+        <div>
+          <h3>Temps réel des absences</h3>
+          <DataGrid
+            className="data-grid"
+            rows={thirdGridRows}
+            columns={thirdGridColumns}
+            rowHeight={200}
+            pageSize={5}
+            disableSelectionOnClick
+          />
+        </div>
+      )}
     </div>
   );
 };

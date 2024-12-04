@@ -5,3 +5,28 @@
     background-color: #fff; /* Fond blanc pour l'en-tête */
   }
   
+  /* Centraliser le texte dans les cellules Région et Entreprise */
+.table td, .table th {
+  text-align: center; /* Centrer le texte */
+}
+
+/* Appliquer une bordure et du padding pour une meilleure présentation */
+.table td, .table th {
+  padding: 10px;
+}
+
+/* Style spécifique pour la colonne Région */
+.table .region-column,
+.table .company-column {
+  text-align: center;
+}
+
+/* Si vous avez besoin de centrer la première cellule du tableau (Région) dans la table */
+.table .region-column {
+  vertical-align: middle; /* Centrer verticalement le texte */
+}
+
+/* Si vous avez besoin de centrer la cellule de l'entreprise */
+.table .company-column {
+  vertical-align: middle; /* Centrer verticalement le texte */
+}

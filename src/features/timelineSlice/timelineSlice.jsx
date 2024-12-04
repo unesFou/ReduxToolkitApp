@@ -30,20 +30,20 @@ export const fetchTimelineData = createAsyncThunk(
   'timeline/fetchData',
   async ({ bt_id, date_start, date_end }, { getState, rejectWithValue }) => {
     try {
-      const state = getState().timeline;
+     // const state = getState().timeline;
 
       // Vérifier le cache
-      const cachedData = state.cache?.find(
-        (item) =>
-          item.bt_id === bt_id &&
-          item.date_start === date_start &&
-          item.date_end === date_end
-      );
+      // const cachedData = state.cache?.find(
+      //   (item) =>
+      //     item.bt_id === bt_id &&
+      //     item.date_start === date_start &&
+      //     item.date_end === date_end
+      // );
 
-      if (cachedData) {
-        console.log('Data retrieved from cache:', cachedData.data);
-        return cachedData.data; // Retourner les données mises en cache
-      }
+      // if (cachedData) {
+      //  // console.log('Data retrieved from cache:', cachedData.data);
+      //   return cachedData.data; // Retourner les données mises en cache
+      // }
 
       // Appeler l'API si les données ne sont pas dans le cache
       const data = await fetchDataNotif(bt_id, date_start, date_end);
