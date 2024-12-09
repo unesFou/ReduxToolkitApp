@@ -19,7 +19,7 @@ export const fetchImages = createAsyncThunk(
 const imagesSlice = createSlice({
   name: 'images',
   initialState: {
-    cache: {}, // Cache des images par ID
+    cache: {},
     loading: false,
     error: null,
   },

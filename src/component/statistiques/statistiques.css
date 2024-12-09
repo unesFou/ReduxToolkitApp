@@ -75,6 +75,7 @@
 /* Style pour la liste principale */
 .list-item {
     display: flex;
+    /* display: inline-table; */
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #e0e0e0;
@@ -101,3 +102,21 @@
     align-items: center;
     padding: 5px 0;
 }
+
+@keyframes blink {
+    0% {
+      opacity: 1; /* Visible */
+    }
+    50% {
+      opacity: 0; /* Invisible */
+    }
+    100% {
+      opacity: 1; /* Visible */
+    }
+  }
+  
+  .blink {
+    animation: blink 1s step-start infinite; /* Animation de 1 seconde, répétée indéfiniment */
+  }
+  
+  

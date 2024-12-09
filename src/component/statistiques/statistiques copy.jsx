@@ -45,13 +45,9 @@ export default function MultiActionAreaCard() {
   };
 
   const handleBack = () => {
-    if (viewMode === 'brigades') {
-      setCurrentList(data);
-      setViewMode('compagnies');
-      setSelectedCompagnie(null);
-    }
+    setCurrentList(selectedCompagnie ? selectedCompagnie.childs || [] : []);
+    setViewMode('compagnies');
   };
-  
 
   const handleImagePopupOpen = (bt_id) => {
     setSelectedBtId(bt_id); // Stocke l'ID pour le composant d'affichage d'images
@@ -79,36 +75,21 @@ export default function MultiActionAreaCard() {
     <>
       {data.map((item) => (
         <Button
-        key={item.id}
-        onClick={() => handleOpen(item.childs || [])}
-        style={{
-          margin: '10px',
-          width: '30%',
-          height: '10%',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          padding: '5px 10px',
-        }}
-      >
-        <div style={{ flex: 1, textAlign: 'left' }}>
-          <span>{item.name}</span>
-        </div>
-        <div
-        className={item.presence_rate < 80 ? 'blink' : ''}
+          key={item.id}
+          variant="contained"
+          onClick={() => handleOpen(item.childs || [])}
           style={{
-            padding: '5px 10px',
+            margin: '10px',
+            width: '30%',
+            height: '10%',
             backgroundColor: item.presence_rate < 80 ? 'red' : '#43c143',
-            color: '#fff',
-            borderRadius: '4px',
-            textAlign: 'right',
+            justifyContent: 'space-between',
           }}
+          className={item.presence_rate < 80 ? 'blink' : ''}
         >
-          <span >{item.presence_rate}%</span>
-        </div>
-      </Button>      
-      
+          <span style={{ textAlign: 'left' }}>{item.name}</span>
+          <span style={{ textAlign: 'right' }}>{item.presence_rate}%</span>
+        </Button>
       ))}
 
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
@@ -146,7 +127,7 @@ export default function MultiActionAreaCard() {
             ))}
           </List>
         </DialogContent>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px' }}>
           {viewMode === 'brigades' && (
             <Button onClick={handleBack} variant="contained" color="primary">
               Retour
@@ -156,7 +137,6 @@ export default function MultiActionAreaCard() {
             Fermer
           </Button>
         </div>
-
       </Dialog>
 
       {/* Popup pour les images */}

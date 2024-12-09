@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useMemo } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardData } from "./../../features/dashboardSlice/dashboardSlice";
@@ -119,36 +119,89 @@ const Historique = () => {
     region.regionName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const flattenDataForExcel = () => {
+    const flattenedData = [];
+    filteredData.forEach((region) => {
+      region.childs.forEach((company, companyIdx) => {
+        company.brigades.forEach((brigade, brigadeIdx) => {
+          flattenedData.push({
+            Region: companyIdx === 0 && brigadeIdx === 0 ? region.regionName : "", // Fusionner les cellules Région
+            "Total Absence Région": companyIdx === 0 && brigadeIdx === 0 ? formatDuration(region.totalAbsRegion) : "", // Fusionner Total Région
+            Compagnie: brigadeIdx === 0 ? company.companyName : "", // Fusionner les cellules Compagnie
+            "Total Absence Compagnie": brigadeIdx === 0 ? formatDuration(company.totalAbsCompany) : "", // Fusionner Total Compagnie
+            Brigade: brigade.brigadeName,
+            "Durée d'absence": brigade.absDuration,
+          });
+        });
+      });
+    });
+    return flattenedData;
+  };
+  
+  
+  // Utilisation
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const flattenedData = flattenDataForExcel();
+    const worksheet = XLSX.utils.json_to_sheet(flattenedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "FilteredData");
     XLSX.writeFile(workbook, "FilteredData.xlsx");
   };
+  
 
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Filtered Data", 20, 10);
+  
     const pdfData = [];
     filteredData.forEach((region) => {
-      region.childs.forEach((company) => {
-        company.brigades.forEach((brigade) => {
+      region.childs.forEach((company, companyIdx) => {
+        company.brigades.forEach((brigade, brigadeIdx) => {
           pdfData.push([
-            region.regionName,
-            company.companyName,
+            companyIdx === 0 && brigadeIdx === 0 ? region.regionName : "", // Fusion Région
+            companyIdx === 0 && brigadeIdx === 0 ? formatDuration(region.totalAbsRegion) : "", // Total Région
+            brigadeIdx === 0 ? company.companyName : "", // Fusion Compagnie
+            brigadeIdx === 0 ? formatDuration(company.totalAbsCompany) : "", // Total Compagnie
             brigade.brigadeName,
             brigade.absDuration,
           ]);
         });
       });
     });
-
+  
     doc.autoTable({
-      head: [["Region", "Company", "Brigade", "Absence Duration"]],
+      head: [["Région", "Total Région", "Compagnie", "Total Compagnie", "Brigade", "Durée d'absence"]],
       body: pdfData,
+      styles: { fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 40 }, // Région
+        1: { cellWidth: 30 }, // Total Région
+        2: { cellWidth: 40 }, // Compagnie
+        3: { cellWidth: 30 }, // Total Compagnie
+        4: { cellWidth: 40 }, // Brigade
+        5: { cellWidth: 30 }, // Durée
+      },
     });
+  
     doc.save("FilteredData.pdf");
   };
+  
+  const sortedAndFilteredData = useMemo(() => {
+    return filteredData.map((region) => {
+      return {
+        ...region,
+        childs: region.childs.map((company) => ({
+          ...company,
+          brigades: [...company.brigades].sort((a, b) => {
+            return sortOrder === "asc"
+              ? a.absDurationInSeconds - b.absDurationInSeconds
+              : b.absDurationInSeconds - a.absDurationInSeconds;
+          }),
+        })),
+      };
+    });
+  }, [filteredData, sortOrder]);
+  
 
   if (loading) return <div>Chargement des données...</div>;
   if (error) return <div>Erreur lors du chargement des données.</div>;
