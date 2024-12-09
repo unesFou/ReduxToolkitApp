@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -12,9 +12,12 @@ import ChartIcon from '@mui/icons-material/BarChart';
 import ImageIcon from '@mui/icons-material/Image';
 import Typography from '@mui/material/Typography';
 import SingleLineImageList from './SingleLineImageList/SingleLineImageList';
+import { fetchTimelineData } from '../../features/timelineSlice/timelineSlice';
+import axios from 'axios';
 import './statistiques.css';
 
 export default function MultiActionAreaCard() {
+  const dispatch = useDispatch();
   const { data: rawData, loading, error } = useSelector((state) => state.dashboard);
 
   const data = Array.isArray(rawData?.data) ? rawData.data : rawData;
@@ -23,7 +26,7 @@ export default function MultiActionAreaCard() {
   const [childs, setChilds] = useState([]);
   const [subChilds, setSubChilds] = useState([]);
   const [imagePopupOpen, setImagePopupOpen] = useState(false);
-  const [imagePopupBtId, setImagePopupBtId] = useState(null); // State for bt_id
+  const [imagePopupData, setImagePopupData] = useState([]);
 
   const handleOpen = (childs) => {
     setChilds(childs);
@@ -34,18 +37,52 @@ export default function MultiActionAreaCard() {
     setOpen(false);
   };
 
-  const handleDetail = (child) => {
-    setSubChilds(child.childs || []);
+  const handleDetail = async (child) => {
+    if (!child?.childs) return;
+    const start = new Date();
+    const end = new Date();
+
+    try {
+      const results = await Promise.all(
+        child.childs.map((subChild) =>
+          dispatch(
+            fetchTimelineData({
+              bt_id: subChild.id,
+              date_start: start.toISOString().slice(0, 16),
+              date_end: end.toISOString().slice(0, 16),
+            })
+          ).unwrap()
+        )
+      );
+      setSubChilds(results);
+    } catch (error) {
+      console.error('Error fetching timeline data:', error);
+    }
   };
 
-  const handleImagePopupOpen = (bt_id) => {
-    setImagePopupBtId(bt_id);
-    setImagePopupOpen(true);
+  const handleImagePopupOpen = async (subChild) => {
+    if (!subChild?.notifications) return;
+
+    try {
+      // Récupération des IDs des notifications
+      const notificationIds = subChild.notifications.map((notif) => notif.id);
+
+      // Récupération des images associées aux notifications
+      const results = await Promise.all(
+        notificationIds.map((id) =>
+          axios.get(`http://localhost:8069/api/img_notif/${id}`).then((res) => res.data)
+        )
+      );
+
+      setImagePopupData(results); // Stockage des images récupérées
+      setImagePopupOpen(true);
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    }
   };
 
   const handleImagePopupClose = () => {
     setImagePopupOpen(false);
-    setImagePopupBtId(null); // Reset bt_id
   };
 
   if (loading) {
@@ -115,7 +152,7 @@ export default function MultiActionAreaCard() {
                       <ChartIcon />
                     </IconButton>
                     <IconButton>
-                      <ImageIcon onClick={() => handleImagePopupOpen(subChild.id)} />
+                      <ImageIcon onClick={() => handleImagePopupOpen(subChild)} />
                     </IconButton>
                   </div>
                 </div>
@@ -133,7 +170,7 @@ export default function MultiActionAreaCard() {
       >
         <DialogTitle>Images</DialogTitle>
         <DialogContent>
-          <SingleLineImageList bt_id={imagePopupBtId} />
+          <SingleLineImageList images={imagePopupData} />
         </DialogContent>
         <Button onClick={handleImagePopupClose} style={{ margin: '10px' }}>
           Fermer

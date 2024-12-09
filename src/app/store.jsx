@@ -4,6 +4,7 @@ import authReducer from '../features/authSlice/authSlice';
 import dashboardReducer from '../features/dashboardSlice/dashboardSlice';
 import searchReducer from '../features/searchSlice/searchSlice';
 import timelineReducer from '../features/timelineSlice/timelineSlice';
+import imagesReducer from '../features/imagesSlice/imagesSlice';
 
 import { persistReducer, persistStore } from 'redux-persist';
 import { combineReducers } from 'redux';
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   dashboard: dashboardReducer,
   search: searchReducer,
   timeline: timelineReducer,
+  images : imagesReducer
 });
 
 // Création d'un reducer persisté

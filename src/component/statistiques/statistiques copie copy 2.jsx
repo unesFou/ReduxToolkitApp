@@ -17,13 +17,13 @@ import './statistiques.css';
 export default function MultiActionAreaCard() {
   const { data: rawData, loading, error } = useSelector((state) => state.dashboard);
 
-  const data = Array.isArray(rawData?.data) ? rawData.data : rawData;
+  const data = Array.isArray(rawData?.data) ? rawData.data : rawData; // Vérification de la structure
 
   const [open, setOpen] = useState(false);
   const [childs, setChilds] = useState([]);
   const [subChilds, setSubChilds] = useState([]);
   const [imagePopupOpen, setImagePopupOpen] = useState(false);
-  const [imagePopupBtId, setImagePopupBtId] = useState(null); // State for bt_id
+  const [imagePopupData, setImagePopupData] = useState([]);
 
   const handleOpen = (childs) => {
     setChilds(childs);
@@ -38,14 +38,13 @@ export default function MultiActionAreaCard() {
     setSubChilds(child.childs || []);
   };
 
-  const handleImagePopupOpen = (bt_id) => {
-    setImagePopupBtId(bt_id);
+  const handleImagePopupOpen = (images) => {
+    setImagePopupData(images || []); // Récupération des données à afficher
     setImagePopupOpen(true);
   };
 
   const handleImagePopupClose = () => {
     setImagePopupOpen(false);
-    setImagePopupBtId(null); // Reset bt_id
   };
 
   if (loading) {
@@ -115,7 +114,7 @@ export default function MultiActionAreaCard() {
                       <ChartIcon />
                     </IconButton>
                     <IconButton>
-                      <ImageIcon onClick={() => handleImagePopupOpen(subChild.id)} />
+                      <ImageIcon onClick={() => handleImagePopupOpen(subChild.images)} />
                     </IconButton>
                   </div>
                 </div>
@@ -133,7 +132,7 @@ export default function MultiActionAreaCard() {
       >
         <DialogTitle>Images</DialogTitle>
         <DialogContent>
-          <SingleLineImageList bt_id={imagePopupBtId} />
+          <SingleLineImageList images={imagePopupData} />
         </DialogContent>
         <Button onClick={handleImagePopupClose} style={{ margin: '10px' }}>
           Fermer
