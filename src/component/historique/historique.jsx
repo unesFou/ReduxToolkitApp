@@ -44,29 +44,60 @@ const Historique = () => {
     )}:${String(secs).padStart(2, "0")}`;
   };
 
+  // const getFilteredParents = () => {
+  //   if (!data || !Array.isArray(data)) return [];
+  //   return data
+  //     // .filter((region) =>
+  //     //   region.childs.some((company) =>
+  //     //     company.childs.some((brigade) => brigade.abs_duration)
+  //     //   )
+  //     // )
+  //     .map((region) => ({
+  //       regionName: region.name,
+  //       childs: region.childs.map((company) => ({
+  //         companyName: company.name,
+  //         brigades: company.childs
+  //           .filter((brigade) => brigade.abs_duration !== undefined)
+  //           .map((brigade) => ({
+  //             brigadeName: brigade.name,
+  //             absDuration: formatDuration(brigade.abs_duration),
+  //             absDurationInSeconds: brigade.abs_duration,
+  //           })),
+  //       })),
+  //     }));
+  // };
+
   const getFilteredParents = () => {
     if (!data || !Array.isArray(data)) return [];
-    return data
-      .filter((region) =>
-        region.childs.some((company) =>
-          company.childs.some((brigade) => brigade.abs_duration)
-        )
-      )
-      .map((region) => ({
+    return data.map((region) => {
+      const totalAbsRegion = region.childs
+        .flatMap((company) => company.childs)
+        .reduce((sum, brigade) => sum + (brigade.abs_duration || 0), 0);
+  
+      return {
         regionName: region.name,
-        childs: region.childs.map((company) => ({
-          companyName: company.name,
-          brigades: company.childs
-            .filter((brigade) => brigade.abs_duration !== undefined)
-            .map((brigade) => ({
-              brigadeName: brigade.name,
-              absDuration: formatDuration(brigade.abs_duration),
-              absDurationInSeconds: brigade.abs_duration, // Ajout de la durée en secondes pour trier
-            })),
-        })),
-      }));
+        totalAbsRegion, // Total absence pour la région
+        childs: region.childs.map((company) => {
+          const totalAbsCompany = company.childs.reduce(
+            (sum, brigade) => sum + (brigade.abs_duration || 0),
+            0
+          );
+  
+          return {
+            companyName: company.name,
+            totalAbsCompany, // Total absence pour la compagnie
+            brigades: company.childs
+              .filter((brigade) => brigade.abs_duration !== undefined)
+              .map((brigade) => ({
+                brigadeName: brigade.name,
+                absDuration: formatDuration(brigade.abs_duration),
+                absDurationInSeconds: brigade.abs_duration,
+              })),
+          };
+        }),
+      };
+    });
   };
-
   const handleSort = () => {
     const sorted = [...sortedData];
     sorted.forEach((region) => {
@@ -146,62 +177,87 @@ const Historique = () => {
       {/* Table */}
       <TableContainer component={Paper}>
         <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">Région</TableCell>
-              <TableCell align="center">Compagnie</TableCell>
-              <TableCell align="center">Brigade</TableCell>
-              <TableCell 
-                align="center" 
-                onClick={handleSort} 
-                style={{ cursor: "pointer" }}
+        <TableHead>
+  <TableRow>
+    <TableCell align="center">Région</TableCell>
+    <TableCell align="center">Compagnie</TableCell>
+    <TableCell align="center">Total Absence Compagnie</TableCell>
+    <TableCell align="center">Brigade</TableCell>
+    <TableCell 
+      align="center" 
+      onClick={handleSort} 
+      style={{ cursor: "pointer" }}
+    >
+      Durée d'absence {sortOrder === "asc" ? "↑" : "↓"}
+    </TableCell>
+    <TableCell align="center">Total Absence Région</TableCell>
+  </TableRow>
+</TableHead>
+
+<TableBody>
+  {filteredData.map((region) => {
+    const regionRowSpan = region.childs.reduce(
+      (total, company) => total + company.brigades.length,
+      0
+    );
+    return region.childs.map((company, companyIdx) => {
+      const companyRowSpan = company.brigades.length;
+      return company.brigades.map((brigade, brigadeIdx) => (
+        <TableRow
+          key={`${region.regionName}-${company.companyName}-${brigade.brigadeName}`}
+        >
+          {/* Région */}
+          {companyIdx === 0 && brigadeIdx === 0 && (
+            <TableCell
+              rowSpan={regionRowSpan}
+              align="center"
+              style={{ verticalAlign: "middle" }}
+            >
+              {region.regionName}
+            </TableCell>
+          )}
+
+          {/* Compagnie */}
+          {brigadeIdx === 0 && (
+            <>
+              <TableCell
+                rowSpan={companyRowSpan}
+                align="center"
+                style={{ verticalAlign: "middle" }}
               >
-                Durée d'absence {sortOrder === "asc" ? "↑" : "↓"}
+                {company.companyName}
               </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData.map((region) => {
-              const regionRowSpan = region.childs.reduce(
-                (total, company) => total + company.brigades.length,
-                0
-              );
-              return region.childs.map((company, companyIdx) => {
-                const companyRowSpan = company.brigades.length;
-                return company.brigades.map((brigade, brigadeIdx) => (
-                  <TableRow key={`${region.regionName}-${company.companyName}-${brigade.brigadeName}`}>
-                    {/* Région */}
-                    {companyIdx === 0 && brigadeIdx === 0 && (
-                      <TableCell
-                        rowSpan={regionRowSpan}
-                        align="center"
-                        style={{ verticalAlign: "middle" }}
-                      >
-                        {region.regionName}
-                      </TableCell>
-                    )}
+              <TableCell
+                rowSpan={companyRowSpan}
+                align="center"
+                style={{ verticalAlign: "middle" }}
+              >
+                {formatDuration(company.totalAbsCompany)}
+              </TableCell>
+            </>
+          )}
 
-                    {/* Compagnie */}
-                    {brigadeIdx === 0 && (
-                      <TableCell
-                        rowSpan={companyRowSpan}
-                        align="center"
-                        style={{ verticalAlign: "middle" }}
-                      >
-                        {company.companyName}
-                      </TableCell>
-                    )}
+          {/* Brigade */}
+          <TableCell align="center">{brigade.brigadeName}</TableCell>
 
-                    {/* Brigade */}
-                    <TableCell align="center">{brigade.brigadeName}</TableCell>
+          {/* Durée d'absence */}
+          <TableCell align="center">{brigade.absDuration}</TableCell>
 
-                    {/* Durée d'absence */}
-                    <TableCell align="center">{brigade.absDuration}</TableCell>
-                  </TableRow>
-                ));
-              });
-            })}
-          </TableBody>
+          {/* Total absence Région */}
+          {companyIdx === 0 && brigadeIdx === 0 && (
+            <TableCell
+              rowSpan={regionRowSpan}
+              align="center"
+              style={{ verticalAlign: "middle" }}
+            >
+              {formatDuration(region.totalAbsRegion)}
+            </TableCell>
+          )}
+        </TableRow>
+      ));
+    });
+  })}
+</TableBody>
         </Table>
       </TableContainer>
     </div>

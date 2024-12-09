@@ -129,9 +129,9 @@ export default function MultiActionAreaCard() {
         open={imagePopupOpen}
         onClose={handleImagePopupClose}
         fullWidth
-        maxWidth="md"
+        maxWidth={false}
       >
-        <DialogTitle>Images</DialogTitle>
+        {/* <DialogTitle>Images</DialogTitle> */}
         <DialogContent>
           <SingleLineImageList bt_id={imagePopupBtId} />
         </DialogContent>
