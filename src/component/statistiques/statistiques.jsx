@@ -111,53 +111,79 @@ export default function MultiActionAreaCard() {
       
       ))}
 
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          {viewMode === 'compagnies' ? 'Liste des Compagnies' : 'Liste des Brigades'}
-        </DialogTitle>
-        <DialogContent>
-          <List>
-            {currentList.map((item, index) => (
-              <ListItem key={index} className="list-item">
-                <ListItemText primary={item.name} className="list-item-text" />
-                {viewMode === 'compagnies' ? (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleDetail(item)}
-                    className="detail-button"
-                  >
-                    Détail
-                  </Button>
-                ) : (
-                  <div className="icon-buttons">
-                    <Button variant="contained" color="success">
-                      {item.presence_rate}%
-                    </Button>
-                    <IconButton>
-                      <ChartIcon />
-                    </IconButton>
-                    <IconButton>
-                      <ImageIcon onClick={() => handleImagePopupOpen(item.id)} />
-                    </IconButton>
-                  </div>
-                )}
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px' }}>
+<Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+  <DialogTitle>
+    {viewMode === 'compagnies' ? 'Liste des Compagnies' : 'Liste des Brigades'}
+  </DialogTitle>
+  <DialogContent>
+    <List>
+      {currentList.map((item, index) => (
+        <ListItem key={index} className="list-item" style={{ marginBottom: '10px' }}>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => viewMode === 'compagnies' ? handleDetail(item) : handleImagePopupOpen(item.id)}
+          style={{
+            margin: '5px',
+            width: '100%',
+            textAlign: 'left',
+            padding: '10px',
+            borderRadius: '4px',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>{item.name}</span>
+          
+          {/* Taux de présence avec fond coloré si inférieur à 80 */}
+          <span
+            style={{
+              padding: '5px 10px',
+              backgroundColor: item.presence_rate < 80 ? 'red' : 'green',
+              color: '#fff',
+              borderRadius: '4px',
+              textAlign: 'right',
+            }}
+          >
+            {item.presence_rate}%
+          </span>
+      
           {viewMode === 'brigades' && (
-            <Button onClick={handleBack} variant="contained" color="primary">
-              Retour
-            </Button>
+            <div>
+              <Button size="small" color="secondary">
+                {/* <span
+                style={{
+                  padding: '5px 10px',
+                  backgroundColor: item.presence_rate < 80 ? 'red' : 'green',
+                  color: '#fff',
+                  borderRadius: '4px',
+                  textAlign: 'right',
+                }}
+              >
+               
+               
+          </span> */}
+              </Button>
+            </div>
           )}
-          <Button onClick={handleClose} variant="outlined" color="secondary">
-            Fermer
-          </Button>
-        </div>
+        </Button>
+      </ListItem>
+      
+      ))}
+    </List>
+  </DialogContent>
+  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px' }}>
+    {viewMode === 'brigades' && (
+      <Button onClick={handleBack} variant="contained" color="primary">
+        Retour
+      </Button>
+    )}
+    <Button onClick={handleClose} variant="outlined" color="secondary">
+      Fermer
+    </Button>
+  </div>
+</Dialog>
 
-      </Dialog>
 
       {/* Popup pour les images */}
       <Dialog
