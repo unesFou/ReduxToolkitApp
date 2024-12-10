@@ -11,7 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import ChartIcon from '@mui/icons-material/BarChart';
 import ImageIcon from '@mui/icons-material/Image';
 import Typography from '@mui/material/Typography';
-import SingleLineImageList from './SingleLineImageList/SingleLineImageList'; // Assume this handles image display
+import SingleLineImageList from './SingleLineImageList/SingleLineImageList';
 import './statistiques.css';
 
 export default function MultiActionAreaCard() {
@@ -149,22 +149,8 @@ export default function MultiActionAreaCard() {
           </span>
       
           {viewMode === 'brigades' && (
-            <div>
-              <Button size="small" color="secondary">
-                {/* <span
-                style={{
-                  padding: '5px 10px',
-                  backgroundColor: item.presence_rate < 80 ? 'red' : 'green',
-                  color: '#fff',
-                  borderRadius: '4px',
-                  textAlign: 'right',
-                }}
-              >
-               
-               
-          </span> */}
-              </Button>
-            </div>
+            <ImageIcon color="disabled" />
+            
           )}
         </Button>
       </ListItem>
@@ -192,7 +178,7 @@ export default function MultiActionAreaCard() {
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle>Images associées</DialogTitle>
+        {/* <DialogTitle>Images associées</DialogTitle> */}
         <DialogContent>
           {selectedBtId && <SingleLineImageList bt_id={selectedBtId} />}
         </DialogContent>

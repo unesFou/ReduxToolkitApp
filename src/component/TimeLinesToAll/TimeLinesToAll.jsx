@@ -31,6 +31,82 @@ const TimeLinesToAll = () => {
     }
   }, [rawData]);
 
+  useEffect(() => {
+    if (data.length > 0) {
+      // Sélectionnez automatiquement le premier parent
+      const firstParent = data[0];
+      if (firstParent.childs) {
+        const children = firstParent.childs.map((child) => ({
+          id: child.id,
+          name: child.name,
+          notifications: child.camera_ids?.reduce((total, camera) => {
+            return total + (camera.notifications?.length || 0);
+          }, 0) || 0,
+          childs: child.childs,
+        }));
+  
+        setChildRows(children);
+  
+        // Charge les petits-enfants et les données du troisième tableau
+        if (children.length > 0) {
+          const firstChild = children[0];
+          if (firstChild.childs) {
+            const grandChildIds = firstChild.childs.map((grandChild) => grandChild.id);
+  
+            const start = new Date();
+            start.setHours(8, 0, 0, 0);
+            const end = new Date();
+            end.setHours(23, 59, 0, 0);
+  
+            // Fetch notifications pour les petits-enfants
+            Promise.all(
+              grandChildIds.map((id) =>
+                dispatch(fetchTimelineData({
+                  bt_id: id,
+                  date_start: start.toISOString().slice(0, 16),
+                  date_end: end.toISOString().slice(0, 16),
+                }))
+              )
+            )
+              .then((results) => {
+                const grandChildren = firstChild.childs.map((grandChild, index) => ({
+                  id: grandChild.id,
+                  name: grandChild.name,
+                  notifications: results[index]?.payload?.notifications || 0,
+                }));
+  
+                setGrandChildRows(grandChildren);
+  
+                const thirdGridData = grandChildren.map((grandChild) => ({
+                  id: grandChild.id,
+                  name: grandChild.name,
+                  dataChart: results
+                    .map((e) => e.payload)
+                    .map((e) => e.data)
+                    .flatMap((e) => e.notifs),
+                  chart: (
+                    <TimeLineChart
+                      grandChild={results
+                        .map((e) => e.payload)
+                        .map((e) => e.data)
+                        .flatMap((e) => e.notifs)}
+                    />
+                  ),
+                }));
+  
+                setThirdGridRows(thirdGridData);
+              })
+              .catch((error) => {
+                console.error('Error fetching data for grand children:', error);
+              });
+          }
+        }
+      }
+    }
+  }, [data, dispatch]);
+  
+  
+
   const parentTableColumns = [
     { field: 'name', headerName: 'Région', width: 150, filterable: true },
     { field: 'notifications', headerName: 'Nombre Notifications', width: 250, filterable: true },

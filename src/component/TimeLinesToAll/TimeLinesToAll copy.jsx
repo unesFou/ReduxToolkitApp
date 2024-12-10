@@ -31,6 +31,47 @@ const TimeLinesToAll = () => {
       setData(normalizedData);
     }
   }, [rawData]);
+  useEffect(() => {
+    if (data.length > 0) {
+      // Sélectionnez automatiquement la première ligne
+      const firstParent = data[0];
+      if (firstParent.childs) {
+        const children = firstParent.childs.map((child) => ({
+          id: child.id,
+          name: child.name,
+          notifications: child.camera_ids?.reduce((total, camera) => {
+            return total + (camera.notifications?.length || 0);
+          }, 0) || 0,
+          childs: child.childs,
+        }));
+  
+        setChildRows(children);
+  
+        // Charge les petits-enfants et les données du troisième tableau
+        if (children.length > 0) {
+          const firstChild = children[0];
+          if (firstChild.childs) {
+            const grandChildren = firstChild.childs.map((grandChild) => ({
+              id: grandChild.id,
+              name: grandChild.name,
+              notifications: grandChild.notifications || 0,
+            }));
+  
+            setGrandChildRows(grandChildren);
+  
+            const thirdGridData = grandChildren.map((grandChild) => ({
+              id: grandChild.id,
+              name: grandChild.name,
+              chart: <TimeLineChart grandChild={grandChild.notifications} />,
+            }));
+  
+            setThirdGridRows(thirdGridData);
+          }
+        }
+      }
+    }
+  }, [data]);
+  
 
   const parentTableColumns = [
     { field: 'name', headerName: 'Région', width: 150 },

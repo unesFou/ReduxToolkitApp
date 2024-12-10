@@ -146,7 +146,7 @@ export default function MultiActionAreaCard() {
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle>Images associées</DialogTitle>
+        {/* <DialogTitle>Images associées</DialogTitle> */}
         <DialogContent>
           {selectedBtId && <SingleLineImageList bt_id={selectedBtId} />}
         </DialogContent>
