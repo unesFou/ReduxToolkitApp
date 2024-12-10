@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Button, Card, Modal, Spinner } from 'react-bootstrap';
+import { Table, Spinner } from 'react-bootstrap';
 import { fetchTimelineData } from './../../../features/timelineSlice/timelineSlice';
 import axios from 'axios';
+import { FaImage } from 'react-icons/fa';
+import Alert from '@mui/material/Alert';
 
 export default function SingleLineImageList({ bt_id }) {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
   const [currentImage, setCurrentImage] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const [nameDialog, setNameDialog] = useState(''); 
+
   const dispatch = useDispatch();
 
   // Nouvelle fonction pour traiter l'image en Base64
@@ -36,9 +40,11 @@ export default function SingleLineImageList({ bt_id }) {
         })
       ).unwrap();
 
-      const notificationIds = timelineResults.data.notifs
-        .flatMap((data) => data || [])
-        .map((notif) => notif.id);
+      // Enregistrer les notifications pour affichage
+      const notifications = timelineResults.data.notifs || [];
+      setNotifications(notifications);
+
+      const notificationIds = notifications.map((notif) => notif.id);
 
       // Récupérer les images des notifications
       const imageResults = await Promise.all(
@@ -71,44 +77,92 @@ export default function SingleLineImageList({ bt_id }) {
     fetchData();
   }, [bt_id, dispatch]);
 
-  // Gérer l'affichage de l'image en grand dans le modal
-  const handleShowModal = (image) => {
-    setCurrentImage(image);
-    setShowModal(true);
+  // Gérer l'affichage de l'image en dessous du tableau
+  const handleImageClick = (index) => {
+    setCurrentImage(images[index]);
   };
 
-  const handleCloseModal = () => setShowModal(false);
+  // Fonction pour formater une date ISO en hh:mm:ss
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const hours = String(date.getHours()).padStart(2, '0'); // Formate les heures avec 2 chiffres
+    const minutes = String(date.getMinutes()).padStart(2, '0'); // Formate les minutes avec 2 chiffres
+    const seconds = String(date.getSeconds()).padStart(2, '0'); // Formate les secondes avec 2 chiffres
+    return `${hours}:${minutes}:${seconds}`;
+  };
 
   return (
-    <div className="row">
+    <div className="popup-container" style={{ width: '100%', margin: 'auto'}}>
+      {/* Tableau des notifications */}
       {loading ? (
         <div className="text-center">
           <Spinner animation="border" variant="primary" />
         </div>
       ) : (
-        images.map((item, index) => (
-          <div className="col-6 col-md-4 col-lg-3 mb-4" key={index}>
-            <Card>
-              <Card.Img variant="top" src={item} onClick={() => handleShowModal(item)} />
-              <Card.Body>
-                {/* <Button variant="primary" onClick={() => handleShowModal(item)}>
-                  View Image
-                </Button> */}
-              </Card.Body>
-            </Card>
-          </div>
-        ))
-      )}
+        <div style={{ display: 'flex', flexDirection: 'row', height: '80vh', width: '100%' }}>
+          {/* Première partie : Tableau avec scroll */}
+          <div style={{ flex: 1, overflowY: 'auto', marginRight: '20px' }}>
+            <table className="table table-hover">
+              <thead>
+                <tr style={{ textAlign: 'center' }}>
+                  <th scope="col">Date de début</th>
+                  <th scope="col">Date de fin</th>
+                  <th scope="col">Durée</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Image</th>
+                </tr>
+              </thead>
+              <tbody>
+                {notifications.map((notif, index) => (
+                  <tr key={notif.id} style={{ textAlign: 'center' ,fontFamily: 'initial'}}>
+                    <td>{formatTime(notif.date_s)}</td>
+                    <td>{formatTime(notif.date_e)}</td>
+                    <td >
+                      <div style={{ textAlign: 'center', fontFamily: 'initial' }}>
+                        <Alert 
+                          severity="error" 
+                          style={{ 
+                            backgroundColor: '#fdecea',
+                            color: '#a9150b',
+                            fontSize: '14px', 
+                            fontFamily: 'initial',
+                            textAlign : 'center'
+                          }}
+                        >
+                          {notif.duration}
+                        </Alert>
+                        </div>
+                      </td>
 
-      {/* Modal pour afficher l'image en grand */}
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Image Preview</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <img src={currentImage} alt="Large view" className="img-fluid" />
-        </Modal.Body>
-      </Modal>
+                    <td>{notif.type}</td>
+                    <td>
+                      {/* Icône cliquable pour afficher l'image */}
+                      <button
+                        onClick={() => handleImageClick(index)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                      >
+                        <FaImage size={24} color="blue" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Deuxième partie : Image */}
+          {currentImage && (
+            <div style={{ flex: 1 }}>
+              <img
+                src={currentImage}
+                alt="Large view"
+                className="img-fluid"
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

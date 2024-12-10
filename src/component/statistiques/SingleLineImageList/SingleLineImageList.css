@@ -1,0 +1,59 @@
+/* Style pour le tableau des notifications */
+.table-notifications {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+    background-color: #f8f9fa;
+  }
+  
+  .table-notifications th,
+  .table-notifications td {
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  .table-notifications th {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .table-notifications td {
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .table-notifications td button {
+    color: #007bff;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .table-notifications td button:hover {
+    color: #0056b3;
+  }
+  
+  .table-notifications td button:focus {
+    outline: none;
+  }
+  
+  /* Style pour l'icône de l'image */
+  .btn-icon {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+  }
+  
+  img.img-fluid {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Modal */
+  .modal-body img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  

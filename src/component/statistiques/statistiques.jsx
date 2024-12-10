@@ -25,6 +25,7 @@ export default function MultiActionAreaCard() {
   const [selectedCompagnie, setSelectedCompagnie] = useState(null);
   const [imagePopupOpen, setImagePopupOpen] = useState(false);
   const [selectedBtId, setSelectedBtId] = useState(null); // Stocke l'ID de la brigade pour afficher ses images
+ // const [nameDialog, setNameDialog] = useState(''); 
 
   const handleOpen = (compagnies) => {
     setCurrentList(compagnies);
@@ -149,7 +150,7 @@ export default function MultiActionAreaCard() {
           </span>
       
           {viewMode === 'brigades' && (
-            <ImageIcon color="disabled" />
+            <ImageIcon color="disabled" style={{display:'none'}}/>
             
           )}
         </Button>
@@ -173,19 +174,26 @@ export default function MultiActionAreaCard() {
 
       {/* Popup pour les images */}
       <Dialog
-        open={imagePopupOpen}
-        onClose={handleImagePopupClose}
-        fullWidth
-        maxWidth="md"
-      >
-        {/* <DialogTitle>Images associées</DialogTitle> */}
-        <DialogContent>
-          {selectedBtId && <SingleLineImageList bt_id={selectedBtId} />}
-        </DialogContent>
-        <Button onClick={handleImagePopupClose} style={{ margin: '10px' }}>
-          Fermer
-        </Button>
-      </Dialog>
+      open={imagePopupOpen}
+      onClose={handleImagePopupClose}
+      maxWidth={false} // Désactive les largeurs prédéfinies
+      PaperProps={{
+        style: {
+          width: '90%', // Largeur de 90%
+          maxWidth: '90%', // Empêche les restrictions
+          margin: 'auto', // Centre horizontalement
+          height: '80vh', // Hauteur ajustée (si nécessaire)
+          overflow: 'hidden', // Évite les débordements
+        },
+      }}
+    >
+      <DialogContent style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+        {selectedBtId && <SingleLineImageList bt_id={selectedBtId} />}
+      </DialogContent>
+      <Button onClick={handleImagePopupClose} style={{ margin: '10px' }}>
+        Fermer
+      </Button>
+    </Dialog>
     </>
   );
 }
