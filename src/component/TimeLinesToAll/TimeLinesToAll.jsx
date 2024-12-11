@@ -3,6 +3,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDashboardData } from './../../features/dashboardSlice/dashboardSlice';
 import { fetchTimelineData } from './../../features/timelineSlice/timelineSlice';
+import ErrorPage from './../error/Error';
 import TimeLineChart from './TimeLineChart/TimeLineChart';
 import './TimeLinesToAll.css';
 
@@ -211,7 +212,7 @@ const TimeLinesToAll = () => {
   if (loading) return <div>Loading...</div>;
   if (error) {
     console.log('error', error);
-    return <div>Error loading data</div>;
+    return <ErrorPage errorMessage={error} />;
   }
 
   if (!data || data.length === 0) return <div>No data available</div>;

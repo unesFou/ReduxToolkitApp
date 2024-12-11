@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ApexChart from 'react-apexcharts';
+import ErrorPage from './../error/Error';
 import { CircularProgress } from '@mui/material';
 import ChildCard from './ChildCard';
 
@@ -88,7 +89,7 @@ const TimeLinesByUnit = ({ allData, date_start, date_end }) => {
   }
 
   if (error) {
-    return <div>Error loading data</div>;
+    return <ErrorPage errorMessage={error} />;
   }
 
   return (

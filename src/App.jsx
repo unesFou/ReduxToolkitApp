@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Provider } from 'react-redux';
-import {store} from './app/store';
+import { store } from './app/store';
 import { loadUserFromStorage } from './features/authSlice/authSlice';
 import Authentication from './component/Authentication/Authentication';
 import Dashboard from './component/dashboard/Dashboard';
@@ -11,25 +11,20 @@ import Historique from './component/historique/historique';
 import NavBarApp from './navBar/NavBarApp';
 import LeftMenu from './LeftMenu/LeftMenu';
 import Profil from './component/profil/Profil';
+import TimeLinesToAll from './component/TimeLinesToAll/TimeLinesToAll';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './App.css';
-import TimeLinesToAll from './component/TimeLinesToAll/TimeLinesToAll';
 
 const App = () => {
-   const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     dispatch(loadUserFromStorage());
   }, [dispatch]);
-  
-  // useEffect(() => {
-  //   console.log('User loaded:', user);
-  // }, [user]);
-  
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -39,9 +34,13 @@ const App = () => {
     <Provider store={store}>
       <Router>
         <Routes>
-        {/* <Route path="/" element={!user ? <Authentication /> : <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />}> */}
-          <Route path="/" element={!user ? <Authentication /> : <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} />}>
-            <Route path="/" element={<Dashboard />} />
+          {/* Redirection vers le Dashboard après authentification */}
+          <Route
+            path="/"
+            element={!user ? <Authentication /> : <Navigate to="/dashboard" />}
+          />
+          {/* Si l'utilisateur est authentifié, il pourra naviguer dans les autres pages */}
+          <Route path="/" element={user ? <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} /> : <Navigate to="/" />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="TimeLinesToAll" element={<TimeLinesToAll />} />
             <Route path="statistiques" element={<Statistiques />} />

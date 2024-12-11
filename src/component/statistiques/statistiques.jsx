@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import ChartIcon from '@mui/icons-material/BarChart';
 import ImageIcon from '@mui/icons-material/Image';
 import Typography from '@mui/material/Typography';
+import ErrorPage from './../error/Error';
 import SingleLineImageList from './SingleLineImageList/SingleLineImageList';
 import './statistiques.css';
 
@@ -69,7 +70,7 @@ export default function MultiActionAreaCard() {
   }
 
   if (error) {
-    return <Typography>Error: {error}</Typography>;
+    return <ErrorPage errorMessage={error} />;
   }
 
   if (!data || data.length === 0) {
