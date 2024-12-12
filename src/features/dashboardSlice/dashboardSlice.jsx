@@ -51,7 +51,7 @@ const dashboardSlice = createSlice({
       .addCase(fetchDashboardData.fulfilled, (state, action) => {
         state.loading = false;
         //state.data = action.payload.data;
-        state.data = action.payload;
+        state.data = action.payload.data;
        // console.log("Data fetched and stored in state", action.payload);
 
         state.cache.push({

@@ -28,10 +28,13 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DateRangePickerComponent from '../component/DatePicker/DateRangePicker';
+import { setDates } from '../features/dateSlice/dateSlice';
+
 import './NavBarApp.css';
 
 const NavBarApp = ({ user, handleDrawerToggle }) => {
   const dispatch = useDispatch();
+  const { startDate, endDate } = useSelector((state) => state.dates);
   const { data } = useSelector((state) => state.dashboard);
 
   const handleLogout = () => {
@@ -45,6 +48,23 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const handleDateChange = (args) => {
+    const { start, end } = args;
+  
+    // Ensure start and end are valid Date objects
+    const updatedStartDate = new Date(start);
+    const updatedEndDate = new Date(end);
+    updatedStartDate.setHours(8, 0, 0, 0);
+    updatedEndDate.setHours(23, 59, 0, 0); // 23:59 for the end date
+  
+    // Dispatch updated start and end dates with time
+    dispatch(setDates({
+      startDate: updatedStartDate,
+      endDate: updatedEndDate,
+    }));
+  };
+  
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -227,7 +247,9 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
       <Dialog open={showDatePicker} onClose={handleDatePickerToggle} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Choisir une Date</DialogTitle>
         <DialogContent>
-          <DateRangePickerComponent />
+          <DateRangePickerComponent
+            change={handleDateChange}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDatePickerToggle} color="primary">

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardData } from "./../../features/dashboardSlice/dashboardSlice";
-import { setDates } from './../../features/dateSlice/dateSlice';
 import { Spinner } from 'react-bootstrap';
 import ErrorPage from './../error/Error';
 import {
@@ -19,8 +18,6 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 const Historique = () => {
-  const { startDate, endDate } = useSelector((state) => state.dates);
-  
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector((state) => state.dashboard);
 
@@ -29,44 +26,14 @@ const Historique = () => {
   const [sortedData, setSortedData] = useState([]);
 
   useEffect(() => {
-    // Initialisation des dates si elles ne sont pas définies dans l'état
-    const defaultStartDate = new Date();
-    defaultStartDate.setHours(8, 0, 0, 0); // 08h00 du jour
+    const startDate = new Date().toISOString().slice(0, 16);
+    const endDate = new Date().toISOString().slice(0, 16);
+    dispatch(fetchDashboardData({ startDate, endDate }));
+  }, [dispatch]);
 
-    const defaultEndDate = new Date();
-    defaultEndDate.setHours(23, 59, 0, 0); // 23h59 du jour
-
-    // Vérifier si startDate et endDate existent et les formater
-    const finalStartDate = startDate
-        ? new Date(startDate).setHours(7, 0, 0, 0)  // Utiliser startDate si disponible
-        : defaultStartDate.getTime(); // sinon utiliser la date par défaut
-
-    const finalEndDate = endDate
-        ? new Date(endDate).setHours(23, 59, 0, 0) // Utiliser endDate si disponible
-        : defaultEndDate.getTime(); // sinon utiliser la date par défaut
-
-    // Convertir en format 'YYYY-MM-DDTHH:MM' (format personnalisé sans secondes ni fuseau horaire)
-    const formatDate = (date) => {
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0'); // Mois en format 2 chiffres
-        const day = String(d.getDate()).padStart(2, '0'); // Jour en format 2 chiffres
-        const hours = String(d.getHours()).padStart(2, '0'); // Heure en format 2 chiffres
-        const minutes = String(d.getMinutes()).padStart(2, '0'); // Minutes en format 2 chiffres
-
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
-
-    const isoStartDate = formatDate(finalStartDate);
-    const isoEndDate = formatDate(finalEndDate);
-
-    console.log('finalStartDate', isoStartDate, 'finalEndDate', isoEndDate);
-
-    // Chargement des données avec les dates choisies
-    dispatch(fetchDashboardData({ date_start: isoStartDate, date_end: isoEndDate }));
-}, [dispatch, startDate, endDate]);
-
-
+  useEffect(() => {
+    setSortedData(getFilteredParents()); // mettre à jour les données triées lorsque les données changent
+  }, [data]);
 
   const formatDuration = (seconds) => {
     const hours = Math.floor(seconds / 3600);

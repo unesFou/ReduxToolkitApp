@@ -1,28 +1,38 @@
 import React, { useState } from 'react';
 import { DateRangePicker } from 'react-date-range';
-import 'react-date-range/dist/styles.css'; // main style file
-import 'react-date-range/dist/theme/default.css'; // theme css file
+import { useDispatch } from 'react-redux';
+import { setDateRange } from './../../features/dateSlice/dateSlice';
 
-const DateRangePickerDate = () => {
+import 'react-date-range/dist/styles.css'; // Styles pour le date picker
+import 'react-date-range/dist/theme/default.css'; // Thème par défaut
+
+const DateRangePickerComponent = () => {
+  const dispatch = useDispatch();
+
+  // Initialisez l'état local pour `ranges`
   const [state, setState] = useState([
     {
       startDate: new Date(),
       endDate: new Date(),
-      key: 'selection'
-    }
+      key: 'selection', // Clé obligatoire pour le composant
+    },
   ]);
 
-  const handleSelect = (ranges) => {
-    console.log(ranges);
-    setState([ranges.selection]);
+  // Gérer le changement de plage de dates
+  const handleDateChange = (ranges) => {
+    const { startDate, endDate } = ranges.selection; // Extraire les dates
+    setState([ranges.selection]); // Mettre à jour l'état local
+    dispatch(setDateRange({ startDate, endDate })); // Mettre à jour le store Redux
   };
 
   return (
-    <DateRangePicker
-      ranges={state}
-      onChange={handleSelect}
-    />
+    <div>
+      <DateRangePicker
+        ranges={state}
+        onChange={handleDateChange} // Fonction appelée lors de chaque modification
+      />
+    </div>
   );
 };
 
-export default DateRangePickerDate;
+export default DateRangePickerComponent;
