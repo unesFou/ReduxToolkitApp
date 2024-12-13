@@ -28,13 +28,14 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DateRangePickerComponent from '../component/DatePicker/DateRangePicker';
+import { fetchDashboardData } from "../features/dashboardSlice/dashboardSlice";
 import { setDates } from '../features/dateSlice/dateSlice';
 
 import './NavBarApp.css';
 
 const NavBarApp = ({ user, handleDrawerToggle }) => {
   const dispatch = useDispatch();
-  const { startDate, endDate } = useSelector((state) => state.dates);
+  const { date_start, date_end } = useSelector((state) => state.dates);
   const { data } = useSelector((state) => state.dashboard);
 
   const handleLogout = () => {
@@ -49,21 +50,26 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-  const handleDateChange = (args) => {
-    const { start, end } = args;
+  const handleDateChange = (newStartDate, newEndDate) => {
+    const adjustedStartDate = new Date(newStartDate);
+    adjustedStartDate.setHours(7, 0, 0, 0); // Fixe à 07:00
   
-    // Ensure start and end are valid Date objects
-    const updatedStartDate = new Date(start);
-    const updatedEndDate = new Date(end);
-    updatedStartDate.setHours(8, 0, 0, 0);
-    updatedEndDate.setHours(23, 59, 0, 0); // 23:59 for the end date
+    const adjustedEndDate = new Date(newEndDate);
+    adjustedEndDate.setHours(23, 59, 59, 999); // Fixe à 23:59
   
-    // Dispatch updated start and end dates with time
+    // Mettez à jour les dates dans le store ou le state
     dispatch(setDates({
-      startDate: updatedStartDate,
-      endDate: updatedEndDate,
+      date_start: adjustedStartDate.toISOString().slice(0,16),
+      date_end: adjustedEndDate.toISOString().slice(0,16),
     }));
+  
+    // // Rechargez les données avec les nouvelles dates
+    // dispatch(fetchDashboardData({
+    //   date_start: adjustedStartDate.toISOString(),
+    //   date_end: adjustedEndDate.toISOString(),
+    // }));
   };
+  
   
 
   const handleProfileMenuOpen = (event) => {

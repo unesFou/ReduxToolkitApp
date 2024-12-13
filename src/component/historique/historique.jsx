@@ -3,8 +3,9 @@ import { Button, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardData } from "./../../features/dashboardSlice/dashboardSlice";
 import { setDates } from './../../features/dateSlice/dateSlice';
+import Alert from '@mui/material/Alert';
 import { Spinner } from 'react-bootstrap';
-import ErrorPage from './../error/Error';
+//import ErrorPage from './../error/Error';
 import {
   Table,
   TableBody,
@@ -19,55 +20,89 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 const Historique = () => {
-  const { startDate, endDate } = useSelector((state) => state.dates);
   
+  const { startDate, endDate } = useSelector((state) => state.dates);
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector((state) => state.dashboard);
-
+  
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc"); // état pour suivre l'ordre du tri
+  const [sortOrder, setSortOrder] = useState("asc");
   const [sortedData, setSortedData] = useState([]);
-
-  useEffect(() => {
-    // Initialisation des dates si elles ne sont pas définies dans l'état
-    const defaultStartDate = new Date();
-    defaultStartDate.setHours(8, 0, 0, 0); // 08h00 du jour
-
+  
+  const formattedStartDate = startDate	? new Date(startDate).toLocaleDateString() : 'Non défini';
+  const formattedEndDate = endDate ? new Date(endDate).toLocaleDateString() : 'Non défini';
+  
+  const defaultStartDate = new Date();
+    defaultStartDate.setHours(8, 0, 0, 0); // 08:00
     const defaultEndDate = new Date();
-    defaultEndDate.setHours(23, 59, 0, 0); // 23h59 du jour
+    defaultEndDate.setHours(23, 59, 0, 0); // 23:59
 
-    // Vérifier si startDate et endDate existent et les formater
-    const finalStartDate = startDate
-        ? new Date(startDate).setHours(7, 0, 0, 0)  // Utiliser startDate si disponible
-        : defaultStartDate.getTime(); // sinon utiliser la date par défaut
+    useEffect(() => {
+      // Si les dates ne sont pas définies (par exemple, si elles n'ont pas été sélectionnées par l'utilisateur),
+      // on les remplace par les dates par défaut
+      const startDatee = defaultStartDate ? defaultStartDate : new Date(startDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16);
+      const endDatee = defaultEndDate ? defaultEndDate : new Date(endDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16);
+    
+      // Fonction pour convertir une date au format "dd/mm/yyyy" en format "yyyy-mm-dd"
+      const convertDateFormat = (dateStr) => {
+        const [day, month, year] = dateStr.split('/');
+        return new Date(year, month - 1, day, 8, 0, 0, 0); // Définir l'heure à 8h00
+      };
+    
+      // Convertir les dates formatées en objets Date
+      const formattedStartDatee = new Date(convertDateFormat(formattedStartDate).setHours(8,0,0,0)).toISOString().slice(0, 16);
+      const formattedEndDatee = new Date(convertDateFormat(formattedEndDate).setHours(23,59,0,0)).toISOString().slice(0, 16);
+    
+      // Vérifier si les dates sont sélectionnées
+      if (formattedStartDatee !== defaultStartDate.toISOString().slice(0, 16) && formattedEndDatee !== defaultEndDate.toISOString().slice(0, 16)) {
+        dispatch(setDates({
+          startDate: formattedStartDatee,
+          endDate: formattedEndDatee,
+        }))
+        dispatch(fetchDashboardData({
+          date_start: formattedStartDatee,
+          date_end: formattedEndDatee,
+        }));
+        ;
+      } else {
+        // Fetch les données avec les dates mises à jour
+        dispatch(fetchDashboardData({
+          date_start: defaultStartDate.toISOString().slice(0, 16),
+          date_end: defaultEndDate.toISOString().slice(0, 16),
+        }));
+      }
+    }, [dispatch, startDate, endDate, formattedStartDate, formattedEndDate]);
+    
+    
 
-    const finalEndDate = endDate
-        ? new Date(endDate).setHours(23, 59, 0, 0) // Utiliser endDate si disponible
-        : defaultEndDate.getTime(); // sinon utiliser la date par défaut
+// useEffect(() => {
+//       // Si les dates ne sont pas définies (par exemple, si elles n'ont pas été sélectionnées par l'utilisateur),
+//       // on les remplace par les dates par défaut
+//         const startDatee = defaultStartDate ? defaultStartDate : new Date(startDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16) ;
+//         const endDatee = defaultEndDate ? defaultEndDate : new Date(endDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16)  ;
 
-    // Convertir en format 'YYYY-MM-DDTHH:MM' (format personnalisé sans secondes ni fuseau horaire)
-    const formatDate = (date) => {
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0'); // Mois en format 2 chiffres
-        const day = String(d.getDate()).padStart(2, '0'); // Jour en format 2 chiffres
-        const hours = String(d.getHours()).padStart(2, '0'); // Heure en format 2 chiffres
-        const minutes = String(d.getMinutes()).padStart(2, '0'); // Minutes en format 2 chiffres
+//       // Vérifier si les dates sont sélectionnées
+//       const formattedStartDatee = new Date(formattedStartDate).toISOString().slice(0,16);
+//       const formattedEndDatee = new Date(formattedEndDate).toISOString().slice(0,16);
 
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
-
-    const isoStartDate = formatDate(finalStartDate);
-    const isoEndDate = formatDate(finalEndDate);
-
-    console.log('finalStartDate', isoStartDate, 'finalEndDate', isoEndDate);
-
-    // Chargement des données avec les dates choisies
-    dispatch(fetchDashboardData({ date_start: isoStartDate, date_end: isoEndDate }));
-}, [dispatch, startDate, endDate]);
+//       if (formattedStartDatee != defaultStartDate && formattedEndDatee != defaultEndDate){
+//         dispatch(setDates({
+//           startDate: formattedStartDatee , //new Date(startDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16),
+//           endDate : formattedEndDatee //new Date(endDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16) ,
+//         }));
+//       }else{
+//         // Fetch les données avec les dates mises à jour
+//         dispatch(fetchDashboardData({
+//           date_start: startDate,
+//           date_end: endDate,
+//         }));
+//       }
 
 
+//     }, [dispatch, startDate, endDate]);
 
+
+  
   const formatDuration = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -212,12 +247,57 @@ const Historique = () => {
     });
   }, [filteredData, sortOrder]);
 
-  if (loading) return  <Spinner animation="border" variant="primary" />;
-  if (error) return <ErrorPage errorMessage={error} />;
+  if (loading) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          //transform: 'translate(-50%, -50%)',
+          //zIndex: 9999,
+        }}
+      >
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+         transform: 'translate(-50%, -50%)',
+          // zIndex: 9999,
+          width: '100%',
+          display: 'inline-block',
+          textAlign: 'center',
+        }}
+      >
+        <Alert
+          severity="success"
+          style={{
+            fontSize: '16px',
+            fontFamily: 'initial',
+            display: 'inline-block',
+            width: '60%'
+          }}
+        >
+          Aucune notification d'absence
+        </Alert>
+      </div>
+    );
+  }
+  
+
 
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-end mb-3">
+        {/* <h5>Statistiques d'Absence entre {startDate} et {endDate}</h5> */}
         <Button variant="success" className="mr-2" onClick={exportToExcel} style={{ marginRight: '10px' }}>
           Exporter en Excel
         </Button>
@@ -225,13 +305,15 @@ const Historique = () => {
           Exporter en PDF
         </Button>
       </div>
-
+      <h5 className="text-center mb-3">
+        Statistiques d'Absence entre {formattedStartDate} et {formattedEndDate}
+      </h5>
       <Form.Control
         type="text"
         placeholder="Rechercher par nom de région..."
         className="mb-3"
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) =>  setSearchTerm(e.target.value)}
       />
 
       <TableContainer component={Paper} style={{ maxHeight: '1000px', overflowY: 'auto' }}>

@@ -15,6 +15,7 @@ import DialogActions from '@mui/material/DialogActions';
 //import Button from '@mui/material/Button';
 import Button from 'react-bootstrap/Button';
 import { Card } from '@mui/material';
+import { format } from 'date-fns';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -35,13 +36,15 @@ const Dashboard = () => {
     //today.setMonth(today.getMonth() - 5);
     today.setHours(8, 0, 0, 0);
     return today.toISOString().slice(0, 16);
-  };
+    // return format(today, "yyyy-MM-dd'T'HH:mm");
+    };
 
   const getEndDate = () => {
     const today = new Date();
     //today.setMonth(today.getMonth() - 5);
     today.setHours(23, 59, 0, 0);
     return today.toISOString().slice(0, 16);
+    //return format(today, "yyyy-MM-dd'T'HH:mm");
   };
 
   useEffect(() => {
@@ -99,7 +102,7 @@ const Dashboard = () => {
   const calculateAllAbsenceDurations = async (data) => {
     console.log('data dashboard',data);
     const calculatedRows = await Promise.all(
-      data.map(async (item) => {
+      data && data.map(async (item) => {
         // Convertir la durée d'absence en secondes au format hh:mm:ss
         const absenceDuration = convertSecondsToTimeFormat(item.abs_duration);
   

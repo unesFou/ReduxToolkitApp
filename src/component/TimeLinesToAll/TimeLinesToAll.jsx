@@ -19,7 +19,7 @@ const TimeLinesToAll = () => {
 
   useEffect(() => {
     const start = new Date();
-    start.setHours(8, 0, 0, 0);
+    start.setHours(7, 0, 0, 0);
     const end = new Date();
     end.setHours(23, 59, 0, 0);
     dispatch(fetchDashboardData({ startDate: start.toISOString(), endDate: end.toISOString() }));
@@ -55,7 +55,7 @@ const TimeLinesToAll = () => {
             const grandChildIds = firstChild.childs.map((grandChild) => grandChild.id);
   
             const start = new Date();
-            start.setHours(8, 0, 0, 0);
+            start.setHours(7, 0, 0, 0);
             const end = new Date();
             end.setHours(23, 59, 0, 0);
   
@@ -162,7 +162,7 @@ const TimeLinesToAll = () => {
     const grandChildIds = child.childs.map((grandChild) => grandChild.id);
   
     const start = new Date();
-    start.setHours(8, 0, 0, 0);
+    start.setHours(7, 0, 0, 0);
     const end = new Date();
     end.setHours(23, 59, 0, 0);
   

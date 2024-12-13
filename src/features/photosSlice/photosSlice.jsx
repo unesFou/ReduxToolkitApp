@@ -7,7 +7,7 @@ export const fetchTimelineImages = createAsyncThunk(
   async ({ bt_id }, { rejectWithValue }) => {
     try {
       const start = new Date();
-      start.setHours(8, 0, 0, 0);
+      start.setHours(7, 0, 0, 0);
       const end = new Date();
       end.setHours(23, 59, 0, 0);
 

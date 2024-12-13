@@ -6,7 +6,7 @@ const TimeLineChart = ({ grandChild }) => {
 
   // Définir l'heure de début et de fin de la journée
   const startOfDay = new Date();
-  startOfDay.setHours(8, 0, 0, 0);
+  startOfDay.setHours(7, 0, 0, 0);
   const endOfDay = new Date(startOfDay);
   endOfDay.setHours(24, 0, 0, 0);
 

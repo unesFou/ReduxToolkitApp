@@ -24,7 +24,7 @@ export default function SingleLineImageList({ bt_id }) {
   const fetchData = async () => {
     try {
       const start = new Date();
-      start.setHours(8, 0, 0, 0);
+      start.setHours(7, 0, 0, 0);
       const end = new Date();
       end.setHours(23, 59, 0, 0);
 

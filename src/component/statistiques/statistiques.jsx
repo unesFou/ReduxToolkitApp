@@ -57,12 +57,12 @@ export default function MultiActionAreaCard() {
 
   const handleImagePopupOpen = (bt_id) => {
     setSelectedBtId(bt_id); // Stocke l'ID pour le composant d'affichage d'images
-    setImagePopupOpen(true); // Ouvre le popup
+    setImagePopupOpen(true); 
   };
 
   const handleImagePopupClose = () => {
     setSelectedBtId(null); // Réinitialise l'ID
-    setImagePopupOpen(false); // Ferme le popup
+    setImagePopupOpen(false); 
   };
 
   if (loading) {
