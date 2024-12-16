@@ -1,26 +1,18 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardData } from "./../../features/dashboardSlice/dashboardSlice";
 import { setDates } from './../../features/dateSlice/dateSlice';
-import Alert from '@mui/material/Alert';
-import { Spinner } from 'react-bootstrap';
-//import ErrorPage from './../error/Error';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import Button from '@mui/material/Button';
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+// import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
+import Chart from "react-apexcharts";
+import Alert from '@mui/material/Alert';
+import { Spinner } from 'react-bootstrap';
 
 const Historique = () => {
-  
   const { startDate, endDate } = useSelector((state) => state.dates);
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector((state) => state.dashboard);
@@ -28,90 +20,59 @@ const Historique = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [sortedData, setSortedData] = useState([]);
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [chartSortOrder, setChartSortOrder] = useState("asc");
+
   
-  const formattedStartDate = startDate	? new Date(startDate).toLocaleDateString() : 'Non défini';
+  const formattedStartDate = startDate ? new Date(startDate).toLocaleDateString() : 'Non défini';
   const formattedEndDate = endDate ? new Date(endDate).toLocaleDateString() : 'Non défini';
   
   const defaultStartDate = new Date();
-    defaultStartDate.setHours(8, 0, 0, 0); // 08:00
-    const defaultEndDate = new Date();
-    defaultEndDate.setHours(23, 59, 0, 0); // 23:59
+  defaultStartDate.setHours(8, 0, 0, 0); // 08:00
+  const defaultEndDate = new Date();
+  defaultEndDate.setHours(23, 59, 0, 0); // 23:59
 
-    useEffect(() => {
-      // Si les dates ne sont pas définies (par exemple, si elles n'ont pas été sélectionnées par l'utilisateur),
-      // on les remplace par les dates par défaut
-      const startDatee = defaultStartDate ? defaultStartDate : new Date(startDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16);
-      const endDatee = defaultEndDate ? defaultEndDate : new Date(endDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16);
-    
-      // Fonction pour convertir une date au format "dd/mm/yyyy" en format "yyyy-mm-dd"
-      const convertDateFormat = (dateStr) => {
-        const [day, month, year] = dateStr.split('/');
-        return new Date(year, month - 1, day, 8, 0, 0, 0); // Définir l'heure à 8h00
-      };
-    
-      // Convertir les dates formatées en objets Date
-      const formattedStartDatee = new Date(convertDateFormat(formattedStartDate).setHours(8,0,0,0)).toISOString().slice(0, 16);
-      const formattedEndDatee = new Date(convertDateFormat(formattedEndDate).setHours(23,59,0,0)).toISOString().slice(0, 16);
-    
-      // Vérifier si les dates sont sélectionnées
-      if (formattedStartDatee !== defaultStartDate.toISOString().slice(0, 16) && formattedEndDatee !== defaultEndDate.toISOString().slice(0, 16)) {
-        dispatch(setDates({
-          startDate: formattedStartDatee,
-          endDate: formattedEndDatee,
-        }))
-        dispatch(fetchDashboardData({
-          date_start: formattedStartDatee,
-          date_end: formattedEndDatee,
-        }));
-        ;
-      } else {
-        // Fetch les données avec les dates mises à jour
-        dispatch(fetchDashboardData({
-          date_start: defaultStartDate.toISOString().slice(0, 16),
-          date_end: defaultEndDate.toISOString().slice(0, 16),
-        }));
-      }
-    }, [dispatch, startDate, endDate, formattedStartDate, formattedEndDate]);
-    
-    
+      useEffect(() => {
+        // Si les dates ne sont pas définies (par exemple, si elles n'ont pas été sélectionnées par l'utilisateur),
+        // on les remplace par les dates par défaut
+        // const startDatee = defaultStartDate ? defaultStartDate : new Date(startDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16);
+        // const endDatee = defaultEndDate ? defaultEndDate : new Date(endDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16);
+      
+        // Fonction pour convertir une date au format "dd/mm/yyyy" en format "yyyy-mm-dd"
+        const convertDateFormat = (dateStr) => {
+          const [day, month, year] = dateStr.split('/');
+          return new Date(year, month - 1, day, 8, 0, 0, 0); // Définir l'heure à 8h00
+        };
+      
+        // Convertir les dates formatées en objets Date
+        const formattedStartDatee = new Date(convertDateFormat(formattedStartDate).setHours(8,0,0,0)).toISOString().slice(0, 16);
+        const formattedEndDatee = new Date(convertDateFormat(formattedEndDate).setHours(23,59,0,0)).toISOString().slice(0, 16);
+      
+        // Vérifier si les dates sont sélectionnées
+        if (formattedStartDatee !== defaultStartDate.toISOString().slice(0, 16) && formattedEndDatee !== defaultEndDate.toISOString().slice(0, 16)) {
+          dispatch(setDates({
+            startDate: formattedStartDatee,
+            endDate: formattedEndDatee,
+          }))
+          dispatch(fetchDashboardData({
+            date_start: formattedStartDatee,
+            date_end: formattedEndDatee,
+          }));
+          ;
+        } else {
+          // Fetch les données avec les dates mises à jour
+          dispatch(fetchDashboardData({
+            date_start: defaultStartDate.toISOString().slice(0, 16),
+            date_end: defaultEndDate.toISOString().slice(0, 16),
+          }));
+        }
+      }, [dispatch, startDate, endDate, formattedStartDate, formattedEndDate]);
 
-// useEffect(() => {
-//       // Si les dates ne sont pas définies (par exemple, si elles n'ont pas été sélectionnées par l'utilisateur),
-//       // on les remplace par les dates par défaut
-//         const startDatee = defaultStartDate ? defaultStartDate : new Date(startDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16) ;
-//         const endDatee = defaultEndDate ? defaultEndDate : new Date(endDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16)  ;
-
-//       // Vérifier si les dates sont sélectionnées
-//       const formattedStartDatee = new Date(formattedStartDate).toISOString().slice(0,16);
-//       const formattedEndDatee = new Date(formattedEndDate).toISOString().slice(0,16);
-
-//       if (formattedStartDatee != defaultStartDate && formattedEndDatee != defaultEndDate){
-//         dispatch(setDates({
-//           startDate: formattedStartDatee , //new Date(startDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16),
-//           endDate : formattedEndDatee //new Date(endDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16) ,
-//         }));
-//       }else{
-//         // Fetch les données avec les dates mises à jour
-//         dispatch(fetchDashboardData({
-//           date_start: startDate,
-//           date_end: endDate,
-//         }));
-//       }
-
-
-//     }, [dispatch, startDate, endDate]);
-
-
-  
   const formatDuration = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-      2,
-      "0"
-    )}:${String(secs).padStart(2, "0")}`;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
   const getFilteredParents = () => {
@@ -193,7 +154,7 @@ const Historique = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "FilteredData");
     XLSX.writeFile(workbook, "FilteredData.xlsx");
   };
-  
+
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Filtered Data", 20, 10);
@@ -231,21 +192,104 @@ const Historique = () => {
     doc.save("FilteredData.pdf");
   };
 
-  const sortedAndFilteredData = useMemo(() => {
-    return filteredData.map((region) => {
-      return {
-        ...region,
-        childs: region.childs.map((company) => ({
-          ...company,
-          brigades: [...company.brigades].sort((a, b) => {
-            return sortOrder === "asc"
-              ? a.absDurationInSeconds - b.absDurationInSeconds
-              : b.absDurationInSeconds - a.absDurationInSeconds;
-          }),
-        })),
-      };
+ 
+
+  
+  const chartData = useMemo(() => {
+    return data?.map((region) => ({
+      name: region.name,
+      absTotal: region.childs
+        .flatMap((company) => company.childs)
+        .reduce((sum, brigade) => sum + (brigade.abs_duration || 0), 0),
+    }));
+  }, [data]);
+
+  const sortedChartData = useMemo(() => {
+    if (!chartData) return [];
+    
+    const sortedData = [...chartData];
+    sortedData.sort((b, a) => {
+      if (chartSortOrder === "asc") {
+        return a.absTotal - b.absTotal;
+      } else {
+        return b.absTotal - a.absTotal;
+      }
     });
-  }, [filteredData, sortOrder]);
+  
+    return sortedData;
+  }, [chartData, chartSortOrder]);
+
+
+  const chartOptions = {
+    chart: {
+      type: "bar",
+      toolbar: {
+        show: true,
+      },
+      events: {
+        dataPointSelection: (event, chartContext, config) => {
+          const selectedRegion = sortedChartData[config.dataPointIndex].name;
+          setSearchTerm(selectedRegion);
+          console.log(selectedRegion)
+        } 
+       },
+    },
+    plotOptions: {
+          bar: {
+            borderRadius: 10,
+            dataLabels: {
+              position: 'top', // top, center, bottom
+            },
+          }
+        },
+    xaxis: {
+      categories: sortedChartData.map((region) => region.name),
+      title: {
+        text: "",
+      },
+    },
+    yaxis: {
+      title: {
+        text: "",
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: (value) => `${formatDuration(value)}`,
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+  };
+
+  const chartSeries = [
+    {
+      name: "Total Absence",
+      //data: chartData?.map((region) => region.absTotal) || [],
+      data : sortedChartData.map((region) => region.absTotal)
+    },
+  ];
+
+  const handleRegionClick = (regionName) => {
+    setSelectedRegion(regionName);
+  };
+
+  const sortedAndFilteredData = useMemo(() => {
+      return filteredData.map((region) => {
+        return {
+          ...region,
+          childs: region.childs.map((company) => ({
+            ...company,
+            brigades: [...company.brigades].sort((a, b) => {
+              return sortOrder === "asc"
+                ? a.absDurationInSeconds - b.absDurationInSeconds
+                : b.absDurationInSeconds - a.absDurationInSeconds;
+            }),
+          })),
+        };
+      });
+    }, [filteredData, sortOrder]);
 
   if (loading) {
     return (
@@ -254,15 +298,13 @@ const Historique = () => {
           position: 'fixed',
           top: '50%',
           left: '50%',
-          //transform: 'translate(-50%, -50%)',
-          //zIndex: 9999,
         }}
       >
         <Spinner animation="border" variant="primary" />
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div
@@ -270,107 +312,92 @@ const Historique = () => {
           position: 'fixed',
           top: '50%',
           left: '50%',
-         transform: 'translate(-50%, -50%)',
-          // zIndex: 9999,
-          width: '100%',
-          display: 'inline-block',
-          textAlign: 'center',
+          transform: 'translate(-50%, -50%)',
         }}
       >
-        <Alert
-          severity="success"
-          style={{
-            fontSize: '16px',
-            fontFamily: 'initial',
-            display: 'inline-block',
-            width: '60%'
-          }}
-        >
-          Aucune notification d'absence
-        </Alert>
+        <Alert variant="danger">Erreur lors du chargement des données</Alert>
       </div>
     );
   }
+
   
 
-
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-end mb-3">
-        {/* <h5>Statistiques d'Absence entre {startDate} et {endDate}</h5> */}
-        <Button variant="success" className="mr-2" onClick={exportToExcel} style={{ marginRight: '10px' }}>
-          Exporter en Excel
-        </Button>
-        <Button variant="danger" onClick={exportToPDF}>
-          Exporter en PDF
-        </Button>
+    <div>
+         
+      {/* Graphique pour les absences par région */}
+       <div className="d-flex justify-content-end mb-3">
+               {/* <h5>Statistiques d'Absence entre {startDate} et {endDate}</h5> */}
+               <Button variant="success" className="mr-2" onClick={exportToExcel} style={{ marginRight: '10px' }}>
+                 Exporter en Excel
+               </Button>
+               <Button variant="danger" onClick={exportToPDF}>
+                 Exporter en PDF
+               </Button>
+             </div>
+             <h5 className="text-center mb-3">
+               Statistiques d'Absence entre {formattedStartDate} et {formattedEndDate}
+             </h5>
+      <div style={{ width: '100%', height: 350 }}>
+      <Chart options={chartOptions} series={chartSeries} type="bar" height={250} />
       </div>
-      <h5 className="text-center mb-3">
-        Statistiques d'Absence entre {formattedStartDate} et {formattedEndDate}
-      </h5>
-      <Form.Control
-        type="text"
-        placeholder="Rechercher par nom de région..."
-        className="mb-3"
-        value={searchTerm}
-        onChange={(e) =>  setSearchTerm(e.target.value)}
-      />
 
       <TableContainer component={Paper} style={{ maxHeight: '1000px', overflowY: 'auto' }}>
-        <Table>
-          <TableHead style={{ backgroundColor: '#fff893', position: 'sticky', top: 0, zIndex: 1 }}>
-            <TableRow>
-              <TableCell align="center">Région</TableCell>
-              <TableCell align="center">Compagnie</TableCell>
-              <TableCell align="center">Total Absence Compagnie</TableCell>
-              <TableCell align="center">Brigade</TableCell>
-              <TableCell align="center" onClick={handleSort} style={{ cursor: "pointer" }}>
-                Durée d'absence {sortOrder === "asc" ? "↑" : "↓"}
-              </TableCell>
-              <TableCell align="center">Total Absence Région</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedAndFilteredData.map((region) => {
-              const regionRowSpan = region.childs.reduce(
-                (total, company) => total + company.brigades.length,
-                0
-              );
-              return region.childs.map((company, companyIdx) => {
-                const companyRowSpan = company.brigades.length;
-                return company.brigades.map((brigade, brigadeIdx) => (
-                  <TableRow key={`${region.regionName}-${company.companyName}-${brigade.brigadeName}`}>
-                    {companyIdx === 0 && brigadeIdx === 0 && (
-                      <TableCell rowSpan={regionRowSpan} align="center" style={{ verticalAlign: "middle" }}>
-                        {region.regionName}
-                      </TableCell>
-                    )}
-
-                    {brigadeIdx === 0 && (
-                      <>
-                        <TableCell rowSpan={companyRowSpan} align="center" style={{ verticalAlign: "middle" }}>
-                          {company.companyName}
-                        </TableCell>
-                        <TableCell rowSpan={companyRowSpan} align="center" style={{ verticalAlign: "middle" }}>
-                          {formatDuration(company.totalAbsCompany)}
-                        </TableCell>
-                      </>
-                    )}
-
-                    <TableCell align="center">{brigade.brigadeName}</TableCell>
-                    <TableCell align="center">{brigade.absDuration}</TableCell>
-                    {companyIdx === 0 && brigadeIdx === 0 && (
-                      <TableCell rowSpan={regionRowSpan} align="center" style={{ verticalAlign: "middle" }}>
-                        {formatDuration(region.totalAbsRegion)}
-                      </TableCell>
-                    )}
+              <Table>
+                <TableHead style={{ backgroundColor: '#fff893', position: 'sticky', top: 0, zIndex: 1 }}>
+                  <TableRow>
+                    <TableCell align="center">Région</TableCell>
+                    <TableCell align="center">Compagnie</TableCell>
+                    <TableCell align="center">Total Absence Compagnie</TableCell>
+                    <TableCell align="center">Brigade</TableCell>
+                    <TableCell align="center" onClick={handleSort} style={{ cursor: "pointer" }}>
+                      Durée d'absence {sortOrder === "asc" ? "↑" : "↓"}
+                    </TableCell>
+                    <TableCell align="center">Total Absence Région</TableCell>
                   </TableRow>
-                ));
-              });
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {sortedAndFilteredData.map((region) => {
+                    const regionRowSpan = region.childs.reduce(
+                      (total, company) => total + company.brigades.length,
+                      0
+                    );
+                    return region.childs.map((company, companyIdx) => {
+                      const companyRowSpan = company.brigades.length;
+                      return company.brigades.map((brigade, brigadeIdx) => (
+                        <TableRow key={`${region.regionName}-${company.companyName}-${brigade.brigadeName}`}>
+                          {companyIdx === 0 && brigadeIdx === 0 && (
+                            <TableCell rowSpan={regionRowSpan} align="center" style={{ verticalAlign: "middle" }}>
+                              {region.regionName}
+                            </TableCell>
+                          )}
+      
+                          {brigadeIdx === 0 && (
+                            <>
+                              <TableCell rowSpan={companyRowSpan} align="center" style={{ verticalAlign: "middle" }}>
+                                {company.companyName}
+                              </TableCell>
+                              <TableCell rowSpan={companyRowSpan} align="center" style={{ verticalAlign: "middle" }}>
+                                <Button variant="outlined" color="error">{formatDuration(company.totalAbsCompany)}</Button>
+                              </TableCell>
+                            </>
+                          )}
+      
+                          <TableCell align="center">{brigade.brigadeName}</TableCell>
+                          <TableCell align="center">{brigade.absDuration}</TableCell>
+                          {companyIdx === 0 && brigadeIdx === 0 && (
+                            <TableCell rowSpan={regionRowSpan} align="center" style={{ verticalAlign: "middle" }}>
+                              <Button variant="outlined" color="error">{formatDuration(region.totalAbsRegion)}</Button>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ));
+                    });
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+     
     </div>
   );
 };
