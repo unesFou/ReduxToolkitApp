@@ -24,13 +24,13 @@ const Historique = () => {
   const [chartSortOrder, setChartSortOrder] = useState("asc");
 
   
-  const formattedStartDate = startDate ? new Date(startDate).toLocaleDateString() : 'Non défini';
-  const formattedEndDate = endDate ? new Date(endDate).toLocaleDateString() : 'Non défini';
-  
-  const defaultStartDate = new Date();
-  defaultStartDate.setHours(8, 0, 0, 0); // 08:00
-  const defaultEndDate = new Date();
-  defaultEndDate.setHours(23, 59, 0, 0); // 23:59
+      const formattedStartDate = startDate ? new Date(startDate).toLocaleDateString() : 'Non défini';
+      const formattedEndDate = endDate ? new Date(endDate).toLocaleDateString() : 'Non défini';
+      
+      const defaultStartDate = new Date();
+      defaultStartDate.setHours(8, 0, 0, 0); // 08:00
+      const defaultEndDate = new Date();
+      defaultEndDate.setHours(23, 59, 0, 0); // 23:59
 
       useEffect(() => {
         // Si les dates ne sont pas définies (par exemple, si elles n'ont pas été sélectionnées par l'utilisateur),
@@ -41,10 +41,19 @@ const Historique = () => {
         // Fonction pour convertir une date au format "dd/mm/yyyy" en format "yyyy-mm-dd"
         const convertDateFormat = (dateStr) => {
           const [day, month, year] = dateStr.split('/');
-          return new Date(year, month - 1, day, 8, 0, 0, 0); // Définir l'heure à 8h00
+          return new Date(year, month - 1, day, 8, 0, 0, 0);
         };
       
         // Convertir les dates formatées en objets Date
+        // if (startDate === null && endDate === null){
+        //   let startDate_null = new Date();
+        //   startDate_null.setHours(8, 0, 0, 0);
+        //   startDate = startDate_null;
+        //   let endDate_null = new Date();
+        //   endDate_null.setHours(23, 59, 0, 0);
+        //   endDate = endDate_null;
+        
+        // }
         const formattedStartDatee = new Date(convertDateFormat(formattedStartDate).setHours(8,0,0,0)).toISOString().slice(0, 16);
         const formattedEndDatee = new Date(convertDateFormat(formattedEndDate).setHours(23,59,0,0)).toISOString().slice(0, 16);
       

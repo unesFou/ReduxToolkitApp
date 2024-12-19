@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import Alert from '@mui/material/Alert';
 import { login } from '../../features/authSlice/authSlice';
 import image from './../../images/back.jpg';
+import logo from './../../images/rg.png';
+
 import {
   Button,
   Container,
@@ -31,6 +33,7 @@ const Authentication = () => {
   };
 
   return (
+    
     <div style={{backgroundImage: `url(${image})`, backgroundSize: 'cover'}}>
     <Container className='Authentication' >
       <header className='Authentication-header'>
@@ -38,6 +41,12 @@ const Authentication = () => {
               {user && <Alert severity="success">Authentification avec succés</Alert>}
               {error && <Alert severity="error">Login ou Mot de passe est incorrect</Alert>}
         <Card>
+        <div className="max-w-md mx-auto my-10">
+            <div className="text-center">
+              <img src={logo} alt="My Company Logo" className="w-14 h-26 mx-auto" style={{height: '173px' }}/>
+              <h1 className="my-3 text-3xl font-semibold text-dark-200 dark:text-gray-200" style={{color:'#f7d381'}}>Gestion de présence</h1>
+            </div>
+        </div>
           <CardContent>
             <form onSubmit={handleLogin}> 
               <TextField
@@ -81,11 +90,11 @@ const Authentication = () => {
                 Sign In
               </Button>
              
-              <div className="d-flex justify-content-between mx-4 mb-4">
+              {/* <div className="d-flex justify-content-between mx-4 mb-4">
                 <Link href="#" variant="body2">
                   Forgot password?
                 </Link>
-              </div>
+              </div> */}
             </form>
           </CardContent>
         </Card>

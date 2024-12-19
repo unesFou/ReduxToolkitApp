@@ -12,7 +12,7 @@ import EqualizerIcon from '@material-ui/icons/Equalizer';
 import HistoryIcon from '@mui/icons-material/History';
 import SettingsIcon from '@material-ui/icons/Settings';
 import Hidden from '@material-ui/core/Hidden';
-import { Link } from 'react-router-dom';
+import { Link ,Navigate} from 'react-router-dom';
 
 import logo from './../images/rg.png';
 import './LeftMenu.css';
@@ -36,27 +36,27 @@ const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
         />
       </div>
       <List>
-        <ListItem button component={Link} to="/dashboard" >
+        <ListItem button component={Link} Navigate to="/dashboard" >
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem button component={Link} to="/timelinesToAll" >
+        <ListItem button component={Link} Navigate to="/timelinesToAll" >
           <ListItemIcon>
             <TimerIcon />
           </ListItemIcon>
           <ListItemText primary="Temps Réels" />
         </ListItem>
-        <ListItem button component={Link} to="/statistiques" >
+        <ListItem button component={Link} Navigate to="/historique" >
           <ListItemIcon>
-            <EqualizerIcon />
+            <HistoryIcon />
           </ListItemIcon>
           <ListItemText primary="Statistiques" />
         </ListItem>
-        <ListItem button component={Link} to="/historique" >
+        <ListItem button component={Link} Navigate to="/statistiques" >
           <ListItemIcon>
-            <HistoryIcon />
+            <EqualizerIcon />
           </ListItemIcon>
           <ListItemText primary="Historiques" />
         </ListItem>

@@ -1,9 +1,18 @@
-// src/features/dateSlice/dateSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
+const getDefaultDates = () => {
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setHours(8, 0, 0, 0); // Définit 08h00
+
+  const endDate = new Date(today);
+  endDate.setHours(23, 0, 0, 0); // Définit 23h00
+
+  return { startDate, endDate };
+};
+
 const initialState = {
-  startDate: null,
-  endDate: null,
+  ...getDefaultDates(), // Définit les dates par défaut
 };
 
 const dateSlice = createSlice({
@@ -15,7 +24,6 @@ const dateSlice = createSlice({
       state.startDate = startDate;
       state.endDate = endDate;
     },
-    // Tu peux ajouter ici `setDateRange` si nécessaire
     setDateRange: (state, action) => {
       const { startDate, endDate } = action.payload;
       state.startDate = startDate;
@@ -24,5 +32,5 @@ const dateSlice = createSlice({
   }
 });
 
-export const { setDates, setDateRange } = dateSlice.actions; // Assurez-vous d'exporter `setDateRange`
+export const { setDates, setDateRange } = dateSlice.actions;
 export default dateSlice.reducer;

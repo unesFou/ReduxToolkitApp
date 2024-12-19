@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -16,18 +16,31 @@ import SingleLineImageList from './SingleLineImageList/SingleLineImageList';
 import './statistiques.css';
 
 export default function MultiActionAreaCard() {
-  const { data: rawData, loading, error } = useSelector((state) => state.dashboard);
-
-  const data = Array.isArray(rawData?.data) ? rawData.data : rawData;
-
+  
+  const { cache: rawData, loading, error } = useSelector((state) => state.dashboard);
+  //const data = Array.isArray(rawData?.data) ? rawData.data : rawData;
+  
+  const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [currentList, setCurrentList] = useState([]);
   const [viewMode, setViewMode] = useState('compagnies'); // 'compagnies' ou 'brigades'
   const [selectedCompagnie, setSelectedCompagnie] = useState(null);
   const [imagePopupOpen, setImagePopupOpen] = useState(false);
   const [selectedBtId, setSelectedBtId] = useState(null); // Stocke l'ID de la brigade pour afficher ses images
- // const [nameDialog, setNameDialog] = useState(''); 
+  // const [nameDialog, setNameDialog] = useState(''); 
+  
+  useEffect(() => {
+   // if (!rawData?.data) {
+     // const preparedData = Array.isArray(rawData) ? rawData.map(e=>e.data).flat() : rawData;
+      const preparedData = Array.isArray(rawData?.data) ? rawData?.data.flat() : rawData.flat();
+      setData(preparedData.map(e => e.data).flat() );
+    //}else{
+      //const preparedData = Array.isArray(rawData?.data) ? rawData?.data : rawData;
+      //setData(preparedData);
+   // }
+  }, []);
 
+  
   const handleOpen = (compagnies) => {
     setCurrentList(compagnies);
     setViewMode('compagnies');
@@ -79,7 +92,7 @@ export default function MultiActionAreaCard() {
 
   return (
     <>
-      {data.map((item) => (
+      {data && data.map((item) => (
         <Button
         key={item.id}
         onClick={() => handleOpen(item.childs || [])}
@@ -161,11 +174,11 @@ export default function MultiActionAreaCard() {
     </List>
   </DialogContent>
   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px' }}>
-    {viewMode === 'brigades' && (
+    {/* {viewMode === 'brigades' && (
       <Button onClick={handleBack} variant="contained" color="primary">
         Retour
       </Button>
-    )}
+    )} */}
     <Button onClick={handleClose} variant="outlined" color="secondary">
       Fermer
     </Button>

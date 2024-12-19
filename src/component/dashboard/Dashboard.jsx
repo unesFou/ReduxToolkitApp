@@ -124,7 +124,7 @@ const Dashboard = () => {
     if (dashboardData) {
       calculateAllAbsenceDurations(dashboardData);
     }
-  }, [dashboardData]);
+  }, []);
 
   const handleRowClick = (params) => {
     setLoadingRows((prev) => ({ ...prev, [params.row.id]: true }));
@@ -178,7 +178,7 @@ const Dashboard = () => {
   return (
     <Container>
       <Row className="text-center" style={{ marginBottom: '20px' }}>
-        <h1>Total d'absence du 08h jusqu'à <span style={{ fontWeight: 'bold' }}>{formatTime(currentTime)}</span></h1>
+        <h1>Cumul d'absence du 08h jusqu'à <span style={{ fontWeight: 'bold' }}>{formatTime(currentTime)}</span></h1>
       </Row>
       <Row>
           <div style={{padding:'1%'}}>

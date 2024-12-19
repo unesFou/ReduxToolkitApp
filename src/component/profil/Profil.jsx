@@ -13,7 +13,7 @@ var sampleAccount = {
   image: "https://i.kym-cdn.com/entries/icons/original/000/031/727/cover10.jpg",
   name: "Etat Major",
   email: "admin@gr.ma",
-  title: "El Jefe",
+  title: "Gestion de Présence",
   role: ["Administrator"],
   password: "password"
 };

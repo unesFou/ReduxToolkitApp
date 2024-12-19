@@ -26,6 +26,10 @@
 .Authentication-link {
   color: #61dafb;
 }
+.image-container {
+  width: 50%; /* Adjust width as needed */
+  background-color: transparent; /* Make the background transparent */
+}
 
 @keyframes Authentication-logo-spin {
   from {

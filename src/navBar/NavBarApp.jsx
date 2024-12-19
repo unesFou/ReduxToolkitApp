@@ -181,6 +181,7 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
     <div className="root">
       <AppBar position="fixed" className="appBar">
         <Toolbar className="toolbar">
+        <h5>S.C.T</h5>
           <div className="leftSection">
             <Hidden mdUp>
               <IconButton
@@ -226,12 +227,12 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
               Choisir une Date ?
             </Button>
             <IconButton aria-label="show 4 new mails" color="inherit">
-              <Badge badgeContent={4} color="secondary">
+              <Badge badgeContent={''} color="secondary">
                 <MailIcon />
               </Badge>
             </IconButton>
             <IconButton aria-label="show 17 new notifications" color="inherit">
-              <Badge badgeContent={17} color="secondary">
+              <Badge badgeContent={''} color="secondary">
                 <NotificationsIcon />
               </Badge>
             </IconButton>

@@ -18,7 +18,7 @@ export const fetchDashboardData = createAsyncThunk(
     //   return;
     // }
     
-    const response = await axios.post('/api/dashboard', {
+    const response = await axios.post('/api/dashboard1', {
       params: { date_start , date_end },
     });
     console.log("API Dashboard response:", response.data);
@@ -50,15 +50,18 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchDashboardData.fulfilled, (state, action) => {
         state.loading = false;
-        //state.data = action.payload.data;
-        state.data = action.payload.data;
-       // console.log("Data fetched and stored in state", action.payload);
 
-        state.cache.push({
-          startDate: action.payload.startDate,
-          endDate: action.payload.endDate,
-          data: action.payload.data,
-        });
+        if (action.payload && action.payload.data) {
+          state.data = action.payload.data ;
+      
+          state.cache.push({
+            date_start: action.payload.date_start,
+            date_end: action.payload.date_end,
+            data : action.payload.data ,
+          });
+        } else {
+          console.warn("No data received from API");
+        }
       })
       .addCase(fetchDashboardData.rejected, (state, action) => {
         state.loading = false;

@@ -19,10 +19,10 @@ const TimeLinesToAll = () => {
 
   useEffect(() => {
     const start = new Date();
-    start.setHours(7, 0, 0, 0);
+    start.setHours(8, 0, 0, 0);
     const end = new Date();
     end.setHours(23, 59, 0, 0);
-    dispatch(fetchDashboardData({ startDate: start.toISOString(), endDate: end.toISOString() }));
+    dispatch(fetchDashboardData({ date_start: start.toISOString().slice(0, 16), date_end: end.toISOString().slice(0, 16) }));
   }, [dispatch]);
 
   useEffect(() => {
