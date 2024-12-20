@@ -48,10 +48,13 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    if (data.length === 0) {
     const start = getStartDate();
     const end = getEndDate();
     dispatch(fetchDashboardData({date_start : start, date_end: end }));
-  }, [dispatch]);
+    calculateAllAbsenceDurations(data)
+    }
+  }, [dispatch, data]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -124,7 +127,7 @@ const Dashboard = () => {
     if (dashboardData) {
       calculateAllAbsenceDurations(dashboardData);
     }
-  }, []);
+  }, [data]);
 
   const handleRowClick = (params) => {
     setLoadingRows((prev) => ({ ...prev, [params.row.id]: true }));
@@ -180,16 +183,20 @@ const Dashboard = () => {
       <Row className="text-center" style={{ marginBottom: '20px' }}>
         <h1>Cumul d'absence du 08h jusqu'à <span style={{ fontWeight: 'bold' }}>{formatTime(currentTime)}</span></h1>
       </Row>
-      <Row>
-          <div style={{padding:'1%'}}>
-        <DataGrid rows={rows} columns={columns} pageSize={10} onRowClick={handleRowClick}  
-        initialState={{
-                        sorting: {
-                          sortModel: [{ field: 'absence_duration', sort: 'desc' }],
-                        },
-  }}/>
-          </div>
-      </Row>
+      {loading ? (
+      <CircularProgress />
+              ) : (
+                <Row>
+                    <div style={{padding:'1%'}}>
+                  <DataGrid rows={rows} columns={columns} pageSize={10} onRowClick={handleRowClick}  
+                  initialState={{
+                                  sorting: {
+                                    sortModel: [{ field: 'absence_duration', sort: 'desc' }],
+                                  },
+            }}/>
+                    </div>
+                </Row>
+       )}
 
       <Dialog
         open={open}

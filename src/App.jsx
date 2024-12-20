@@ -41,6 +41,7 @@ const App = () => {
           />
           {/* Si l'utilisateur est authentifié, il pourra naviguer dans les autres pages */}
           <Route path="/" element={user ? <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} /> : <Navigate to="/" />}>
+          {/* <Route path="/" element={user ? <Dashboard /> : <Navigate to="/" />}></Route> */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="TimeLinesToAll" element={<TimeLinesToAll />} />
             <Route path="statistiques" element={<Statistiques />} />
