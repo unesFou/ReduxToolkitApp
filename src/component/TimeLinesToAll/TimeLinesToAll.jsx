@@ -6,6 +6,7 @@ import { fetchTimelineData } from './../../features/timelineSlice/timelineSlice'
 import ErrorPage from './../error/Error';
 import TimeLineChart from './TimeLineChart/TimeLineChart';
 import './TimeLinesToAll.css';
+import icone from '../../images/iconeImage.png';
 
 const TimeLinesToAll = () => {
   const dispatch = useDispatch();
@@ -110,18 +111,24 @@ const TimeLinesToAll = () => {
 
   const parentTableColumns = [
     { field: 'name', headerName: 'Région', width: 150, filterable: true },
-    { field: 'notifications', headerName: 'Nombre Notifications', width: 250, filterable: true },
+    { field: 'notifications', headerName: 'Notifications', width: 100, filterable: true },
   ];
 
   const childTableColumns = [
     { field: 'name', headerName: 'Compagnie', width: 150, filterable: true },
-    { field: 'notifications', headerName: 'Notifications', width: 150, filterable: true },
+    { field: 'notifications', headerName: 'Notifications', filterable: true ,
+      renderCell: (params) => (
+        <div style={{ width: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {params.value}
+        </div>
+      ),
+    },
   ];
 
-  const grandChildColumns = [
-    { field: 'name', headerName: 'Nom du Child', width: 150, filterable: true },
-    { field: 'notifications', headerName: 'Nombre Notifications', width: 150, filterable: true },
-  ];
+  // const grandChildColumns = [
+  //   { field: 'name', headerName: 'Nom du Child', width: 150, filterable: true },
+  //   { field: 'notifications', headerName: 'Nombre Notifications', width: 150, filterable: true },
+  // ];
 
   const thirdGridColumns = [
     { field: 'name', headerName: 'Brigade', width: 150, filterable: true },
@@ -135,6 +142,18 @@ const TimeLinesToAll = () => {
         </div>
       ),
     },
+    {filed : '', headerName : 'images Absence',  width: 150, filterable: true ,renderCell : (paras) => (
+      <div style={{
+        display: 'inline-flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '50%'
+      }}>
+          {/* <button class="btn border border-2 border-dark"> */}
+         <img src={icone}  alt="icone absence"className="w-12 h-8 mx-auto"style={{ maxWidth: '40%' }} />
+          {/* </button> */}
+      </div>
+    )}
   ];
 
   const handleRowClick = (params) => {
@@ -176,7 +195,7 @@ const TimeLinesToAll = () => {
           }))
         )
       );
-      console.log('===============results=============',results)
+   //   console.log('===============results=============',results)
   
       // Map grandChildren data with notifications from the API
       const grandChildren = child.childs.map((grandChild, index) => ({
@@ -219,47 +238,59 @@ const TimeLinesToAll = () => {
 
   return (
     <div className="timeLinesToAll">
-      <div className="table-container">
-        <h2>Tableau des Régions</h2>
-        <DataGrid
-          className="data-grid"
-          rows={data.map((parent) => ({
-            id: parent.id,
-            name: parent.name,
-            notifications: parent.totalNotifications || 0,
-          }))}
-          columns={parentTableColumns}
-          pageSize={5}
-          onRowClick={handleRowClick}
-          filterModel={{
-            items: [
-              { columnField: 'name', operatorValue: 'contains', value: '' },  // Ajoutez des filtres par défaut si nécessaire
-            ],
-          }}
-        />
+      <div >
+      <button type="button" class="btn btn-secondary"><h3>Tableau des Régions </h3> </button>
+        <table class="table table-bordered table-striped" style={{marginTop: '4%'}}>
+          <thead>
+            <tr>
+              <th>Région</th>
+              <th>Notifications</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((parent) => (
+              <tr style={{cursor: 'pointer'}} key={parent.id} onClick={() => handleRowClick({ row: parent })}>
+                <td>{parent.name}</td>
+                <td style={{textAlign:'center'}}>{parent.totalNotifications || 0}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {childRows.length > 0 && (
-        <div className="table-container">
-          <h3>Détails par Compangines</h3>
-          <DataGrid
-            className="data-grid"
-            rows={childRows}
-            columns={childTableColumns}
-            pageSize={5}
-            onRowClick={handleChildRowClick}
-          />
+        <div >
+          <button type="button" class="btn btn-secondary"><h3>Détails par Compagnies</h3></button>
+          <table class="table table-bordered table-hover" style={{marginTop: '4%'}}>
+            <thead>
+              <tr>
+                <th>Compagnie</th>
+                <th>Notifications</th>
+              </tr>
+            </thead>
+            <tbody>
+              {childRows.map((child) => (
+                <tr style={{cursor: 'pointer'}} key={child.id} onClick={() => handleChildRowClick({ row: child })}>
+                  <td>{child.name}</td>
+                  <td style={{textAlign:'center'}}>{child.notifications}</td>
+                 
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
-
+  
       {thirdGridRows.length > 0 && (
-        <div>
+        <div className="main-table-container">
           <h3>Temps réel des absences</h3>
           <DataGrid
             className="data-grid"
             rows={thirdGridRows}
             columns={thirdGridColumns}
             rowHeight={200}
+            autoHeight
+            disableColumnSelector
             pageSize={5}
             disableSelectionOnClick
           />
@@ -267,6 +298,7 @@ const TimeLinesToAll = () => {
       )}
     </div>
   );
+  
 };
 
 export default TimeLinesToAll;

@@ -337,10 +337,10 @@ const Historique = () => {
       {/* Graphique pour les absences par région */}
        <div className="d-flex justify-content-end mb-3">
                {/* <h5>Statistiques d'Absence entre {startDate} et {endDate}</h5> */}
-               <Button variant="success" className="mr-2" onClick={exportToExcel} style={{ marginRight: '10px' }}>
+               <Button class="btn btn-success" onClick={exportToExcel} style={{ marginRight: '15px' }}>
                  Exporter en Excel
                </Button>
-               <Button variant="danger" onClick={exportToPDF}>
+               <Button class="btn btn-warning" onClick={exportToPDF} style={{ marginRight: '15px'}}>
                  Exporter en PDF
                </Button>
              </div>

@@ -24,16 +24,26 @@ export default function SingleLineImageList({ bt_id }) {
 
   const fetchData = async () => {
     try {
-      const start = new Date();
-      start.setHours(7, 0, 0, 0);
-      const end = new Date();
-      end.setHours(23, 59, 0, 0);
+      const date_s = new Date();
+      if (date_s.getHours() < 8) {
+        date_s.setDate(date_s.getDate() - 2);
+      } else {
+        date_s.setDate(date_s.getDate() - 1);
+      }
+      date_s.setHours(8, 0, 0, 0);
+      const date_e = new Date(date_s.getTime() +  (24 * 60 * 60 * 1000));
+  
+      // const dateStartRate = date_s.toISOString().slice(0, 16);
+      // const dateEndRate = date_e.toISOString().slice(0, 16);
+  
+      const dateStartRate = date_s;
+      const dateEndRate = date_e;
 
       const timelineResults = await dispatch(
         fetchTimelineData({
           bt_id,
-          date_start: start.toISOString().slice(0, 16),
-          date_end: end.toISOString().slice(0, 16),
+          date_start: dateStartRate.toISOString().slice(0, 16),
+          date_end: dateEndRate.toISOString().slice(0, 16),
         })
       ).unwrap();
 

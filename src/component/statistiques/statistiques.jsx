@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector , useDispatch } from 'react-redux';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -12,12 +12,13 @@ import ChartIcon from '@mui/icons-material/BarChart';
 import ImageIcon from '@mui/icons-material/Image';
 import Typography from '@mui/material/Typography';
 import ErrorPage from './../error/Error';
+import { fetchDashboardData } from "../../features/dashboardSlice/dashboardSlice";
 import SingleLineImageList from './SingleLineImageList/SingleLineImageList';
 import './statistiques.css';
 
 export default function MultiActionAreaCard() {
   
-  const { cache: rawData, loading, error } = useSelector((state) => state.dashboard);
+  const { data: rawData, loading, error } = useSelector((state) => state.dashboard);
   //const data = Array.isArray(rawData?.data) ? rawData.data : rawData;
   
   const [data, setData] = useState([]);
@@ -28,12 +29,35 @@ export default function MultiActionAreaCard() {
   const [imagePopupOpen, setImagePopupOpen] = useState(false);
   const [selectedBtId, setSelectedBtId] = useState(null); // Stocke l'ID de la brigade pour afficher ses images
   // const [nameDialog, setNameDialog] = useState(''); 
+  const dispatch = useDispatch();
   
   useEffect(() => {
+
+    const date_s = new Date();
+    if (date_s.getHours() < 8) {
+      date_s.setDate(date_s.getDate() - 2);
+    } else {
+      date_s.setDate(date_s.getDate() - 1);
+    }
+    date_s.setHours(8, 0, 0, 0);
+    const date_e = new Date(date_s.getTime() +  (24 * 60 * 60 * 1000));
+
+    // const dateStartRate = date_s.toISOString().slice(0, 16);
+    // const dateEndRate = date_e.toISOString().slice(0, 16);
+
+    const dateStartRate = date_s;
+    const dateEndRate = date_e;
+
+    // setStartDate(dateStartRate);
+    // setEndDate(dateEndRate);
    // if (!rawData?.data) {
      // const preparedData = Array.isArray(rawData) ? rawData.map(e=>e.data).flat() : rawData;
-      const preparedData = Array.isArray(rawData?.data) ? rawData?.data.flat() : rawData.flat();
-      setData(preparedData.map(e => e.data).flat() );
+     dispatch(fetchDashboardData({
+                 date_start: dateStartRate.toISOString().slice(0, 16),
+                 date_end: dateEndRate.toISOString().slice(0, 16),
+               }));
+      const preparedData = Array.isArray(rawData) ? rawData : rawData?.data;
+      setData(preparedData);
     //}else{
       //const preparedData = Array.isArray(rawData?.data) ? rawData?.data : rawData;
       //setData(preparedData);

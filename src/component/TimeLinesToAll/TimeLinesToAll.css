@@ -1,48 +1,45 @@
 /* Conteneur principal */
 .timeLinesToAll {
-  display: flex; /* Disposition en ligne avec Flexbox */
-  gap: 20px; /* Espace entre les deux sections */
-  width: 100%; /* Utiliser toute la largeur disponible */
-  height: 100vh; /* Utiliser toute la hauteur disponible */
-  padding: 20px; /* Marges internes */
-  box-sizing: border-box; /* Inclure padding et bordures dans la largeur/hauteur */
+  display: flex;
+  flex-wrap: wrap; /* Permet aux éléments de se placer sur plusieurs lignes si nécessaire */
+  gap: 10px;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* Conteneur de la table */
 .table-container {
-  flex: 1; /* Prend 1 part de l'espace total */
-  max-width: 25%; /* Limite la largeur à 25% */
-  background-color: #fff; /* Fond blanc */
-  padding: 20px;
-  border-radius: 8px; /* Arrondir les coins */
+  flex: 1 1 calc(0% - 5px); /* Largeur de 25% avec un espace entre les éléments */
+  background-color: #fff;
+  /* padding: 20px; */
+  border-radius: 8px;
   box-sizing: border-box;
-  overflow: auto; /* Ajoute le défilement si le contenu dépasse */
+  overflow: auto;
+  /* min-width: 300px; Largeur minimale pour petits écrans */
 }
 
-/* Conteneur du graphique */
-.chart-container {
-  flex: 3; /* Prend 3 parts de l'espace total (75%) */
-  max-width: 75%; /* Limite la largeur à 75% */
-  background-color: #f4f4f4; /* Fond gris clair */
+/* Conteneur du tableau principal */
+.main-table-container {
+  flex: 1 1 calc(0% - 5px); /* Largeur de 50% */
+  background-color: #f4f4f4;
   padding: 20px;
   border-radius: 8px;
   box-sizing: border-box;
-  overflow: auto; /* Ajoute le défilement si nécessaire */
+  overflow: auto;
+  /* min-width: 400px; Largeur minimale pour les petits écrans */
 }
 
-/* Styles pour le tableau */
+/* Styles pour le DataGrid */
 .data-grid {
-  height: 100%; /* S'assurer que la grille occupe toute la hauteur */
+  height: 100%; /* Occupation complète en hauteur */
+  /* min-height: 200px; Hauteur minimale pour petits écrans */
 }
 
-/* Styles responsives pour petits écrans */
-@media (max-width: 768px) {
-  .timeLinesToAll {
-    flex-direction: column; /* Passe en colonne sur petits écrans */
-  }
-
-  .chart-container, .table-container {
-    flex: none; /* Ignore le ratio de flexbox */
-    width: 100%; /* Les conteneurs prennent 100% de largeur */
+/* Styles responsives pour les très petits écrans */
+@media (max-width: 468px) {
+  .table-container, .main-table-container {
+    /* flex: 1 1 100%; Les éléments occupent 100% de la largeur */
+    min-width: auto; /* Pas de largeur minimale */
   }
 }

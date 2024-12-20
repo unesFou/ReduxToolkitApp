@@ -31,27 +31,50 @@ const Dashboard = () => {
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  const getStartDate = () => {
-    const today = new Date();
-    //today.setMonth(today.getMonth() - 5);
-    today.setHours(8, 0, 0, 0);
-    return today.toISOString().slice(0, 16);
-    // return format(today, "yyyy-MM-dd'T'HH:mm");
-    };
+  // const getStartDate = () => {
+  //   const today = new Date();
+  //   //today.setMonth(today.getMonth() - 5);
+  //   today.setHours(8, 0, 0, 0);
+  //   return today.toISOString().slice(0, 16);
+  //   // return format(today, "yyyy-MM-dd'T'HH:mm");
+  //   };
 
-  const getEndDate = () => {
-    const today = new Date();
-    //today.setMonth(today.getMonth() - 5);
-    today.setHours(23, 59, 0, 0);
-    return today.toISOString().slice(0, 16);
-    //return format(today, "yyyy-MM-dd'T'HH:mm");
-  };
+  // const getEndDate = () => {
+  //   const today = new Date();
+  //   //today.setMonth(today.getMonth() - 5);
+  //   today.setHours(23, 59, 0, 0);
+  //   return today.toISOString().slice(0, 16);
+  //   //return format(today, "yyyy-MM-dd'T'HH:mm");
+  // };
+  const today = new Date();
+  const currentHour = today.getHours();
+  let start = new Date(today);
+  
+  /// Si le temps courant est après 8h00, alors la date de début est à 8h00 de la journée actuelle
+  if (currentHour >= 8) {
+    start.setHours(8 ,0, 0, 0); // Définir la date de début à 8h00
+  } else {
+    // Si le temps courant est avant 8h00, la date de début est à 8h00 de la journée précédente
+    start.setDate(start.getDate() - 1);
+    start.setHours(8, 0, 0, 0); // Définir la date de début à 8h00
+  }
+  
+  // Calculer la date de fin en fonction du temps courant
+  let end = new Date(today);
+  if (currentHour >= 8) {
+    // Si le temps courant est après 8h00, la date de fin est le temps courant
+    end.setSeconds(0);
+  } else {
+    // Si le temps courant est avant 8h00, la date de fin est 7h59 du jour suivant
+    end.setDate(end.getDate());
+    end.setHours(7, 59, 0, 0); // Définir la date de fin à 7h59 du jour suivant
+  }
 
   useEffect(() => {
     if (data.length === 0) {
-    const start = getStartDate();
-    const end = getEndDate();
-    dispatch(fetchDashboardData({date_start : start, date_end: end }));
+    const start_date = start.toISOString().slice(0, 16);
+    const end_date = end.toISOString().slice(0, 16);
+    dispatch(fetchDashboardData({date_start : start_date, date_end: end_date }));
     calculateAllAbsenceDurations(data)
     }
   }, [dispatch, data]);
@@ -245,12 +268,12 @@ const Dashboard = () => {
                   </Card>
                 </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 0', height: '100%' }}>
                 <div style={{ flex: 1.5, marginRight: '10px' }}>
                   <TimeLinesByUnit
                     allData={selectedRowData.relevantData}
-                    date_start={getStartDate()}
-                    date_end={getEndDate()}
+                    date_start={start.toISOString().slice(0, 16)}
+                    date_end={end.toISOString().slice(0, 16)}
                   />
                 </div>
                 {/* <div style={{ flex: 0.5, marginRight: '10px' }}>
