@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import ChartIcon from '@mui/icons-material/BarChart';
 import ImageIcon from '@mui/icons-material/Image';
 import Typography from '@mui/material/Typography';
+import { Spinner } from 'react-bootstrap';
 import ErrorPage from './../error/Error';
 import { fetchDashboardData } from "../../features/dashboardSlice/dashboardSlice";
 import SingleLineImageList from './SingleLineImageList/SingleLineImageList';
@@ -19,6 +20,7 @@ import './statistiques.css';
 export default function MultiActionAreaCard() {
   
   const { data: rawData, loading, error } = useSelector((state) => state.dashboard);
+  const selectedId = useSelector((state) => state.search.selectedId); // Récupérer l'id sélectionné
   //const data = Array.isArray(rawData?.data) ? rawData.data : rawData;
   
   const [data, setData] = useState([]);
@@ -64,6 +66,15 @@ export default function MultiActionAreaCard() {
    // }
   }, []);
 
+  useEffect(() => {
+    const preparedData = Array.isArray(rawData) ? rawData : rawData?.data;
+    setData(preparedData);
+  }, [rawData]);
+
+  const filteredData = selectedId
+    ? data.filter((item) => item.id === selectedId)
+    : data;
+
   
   const handleOpen = (compagnies) => {
     setCurrentList(compagnies);
@@ -103,7 +114,17 @@ export default function MultiActionAreaCard() {
   };
 
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+        }}
+      >
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
   }
 
   if (error) {
@@ -116,7 +137,7 @@ export default function MultiActionAreaCard() {
 
   return (
     <>
-      {data && data.map((item) => (
+      {data && filteredData.map((item) => (
         <Button
         key={item.id}
         onClick={() => handleOpen(item.childs || [])}

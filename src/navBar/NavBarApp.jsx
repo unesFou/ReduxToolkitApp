@@ -28,19 +28,57 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DateRangePickerComponent from '../component/DatePicker/DateRangePicker';
-import { fetchDashboardData } from "../features/dashboardSlice/dashboardSlice";
-import { setDates } from '../features/dateSlice/dateSlice';
-
+//import { fetchDashboardData } from "../features/dashboardSlice/dashboardSlice";
+import { ressetDateRange, setDates } from '../features/dateSlice/dateSlice';
+import { useCookies } from 'react-cookie'; // Importer useCookies de react-cookie
+import { persistor } from '../app/store';
 import './NavBarApp.css';
 
 const NavBarApp = ({ user, handleDrawerToggle }) => {
   const dispatch = useDispatch();
   const { date_start, date_end } = useSelector((state) => state.dates);
   const { data } = useSelector((state) => state.dashboard);
-
-  const handleLogout = () => {
-    dispatch(logout());
+  const [cookies, setCookie, removeCookie] = useCookies(); // Initialiser cookies, setCookie et removeCookie
+  
+  const deleteAllCookies = () => {
+    const cookies = document.cookie.split(";");
+  
+    cookies.forEach((cookie) => {
+      const cookieName = cookie.split("=")[0].trim();
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    });
   };
+  
+  const handleLogout = async () => {
+    try {
+      // Effacer le Redux Store persisté
+      dispatch(ressetDateRange());
+      localStorage.clear();
+      sessionStorage.clear();
+      deleteAllCookies(); // Supprimer tous les cookies
+  
+      // Supprimer les caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        cacheNames.forEach((cacheName) => {
+          caches.delete(cacheName);
+        });
+      }
+  
+      // Purge du persistor
+      await persistor.flush(); // Flusher avant de purger
+      await persistor.purge(); // Purge du stockage persisté
+  
+      // Déconnexion
+      dispatch(logout());
+  
+      // Redémarrage de la page ou redirection
+      window.location.reload(); // Recharge de la page pour réinitialiser l'application
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion', error);
+    }
+  };
+  
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
@@ -103,11 +141,14 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
   };
   
   const handleSearchChange = (event, newValue) => {
-    const selectedOption = (Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []).find(item => item.name === newValue?.name);
+    let selectedOption = '';
+    if (newValue != null){
+       selectedOption = Array.isArray(data) ? data.find((item) => item.name === newValue.name) : null;
+    }
     if (selectedOption) {
-      dispatch(setSelectedId(selectedOption.id));
+      dispatch(setSelectedId(selectedOption.id)); // Met à jour l'id sélectionné dans Redux
     } else {
-      dispatch(setSelectedId(''));
+      dispatch(setSelectedId('')); // Réinitialise si aucune option n'est sélectionnée
     }
   };
   
@@ -199,7 +240,7 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
           <Box sx={{ width: 300 }}>
             <Autocomplete
               freeSolo
-              options={Array.isArray(data?.data) ? data.data : []} // Vérifie si data.data est un tableau
+              options={Array.isArray(data) ? data : []} // Vérifie si data.data est un tableau
               getOptionLabel={(option) => option.name || ''} // Gère les cas où name est absent
               inputValue={searchValue}
               onInputChange={handleSearchInputChange}  // Met à jour l'entrée
@@ -208,7 +249,8 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
                 <TextField 
                   {...params}
                   placeholder="Search unité…"
-                  variant="outlined"
+                 // variant="outlined"
+                 style={{color:'white'}}
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (
@@ -221,7 +263,6 @@ const NavBarApp = ({ user, handleDrawerToggle }) => {
               )}
             />
           </Box>
-
 
             <Button variant="contained" color="primary" onClick={handleDatePickerToggle}>
               Choisir une Date ?

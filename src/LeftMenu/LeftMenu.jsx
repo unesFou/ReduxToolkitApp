@@ -36,12 +36,12 @@ const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
         />
       </div>
       <List>
-        <ListItem button component={Link} Navigate to="/dashboard" >
+        {/* <ListItem button component={Link} Navigate to="/dashboard" >
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
-        </ListItem>
+        </ListItem> */}
         <ListItem button component={Link} Navigate to="/timelinesToAll" >
           <ListItemIcon>
             <TimerIcon />
@@ -77,7 +77,7 @@ const LeftMenu = ({ handleDrawerToggle, mobileOpen }) => {
           variant="temporary"
           anchor="left"
           open={mobileOpen}
-          onClose={handleDrawerToggle}
+          onClose={handleCloseMenu}
           classes={{ paper: 'drawerPaper' }}
           ModalProps={{ keepMounted: true }}
         >

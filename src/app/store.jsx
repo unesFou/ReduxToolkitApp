@@ -33,6 +33,13 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 // Configuration du store Redux
 export const store = configureStore({
   reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) => 
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      },
+      //serializableCheck: false,
+    }),
 });
 
 // Création du persistor pour garder le store en cache

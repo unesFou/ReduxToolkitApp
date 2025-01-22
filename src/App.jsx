@@ -34,14 +34,11 @@ const App = () => {
     <Provider store={store}>
       <Router>
         <Routes>
-          {/* Redirection vers le Dashboard après authentification */}
           <Route
             path="/"
-            element={!user ? <Authentication /> : <Navigate to="/dashboard" />}
+            element={!user ? <Authentication /> : <Navigate to="/historique" />}
           />
-          {/* Si l'utilisateur est authentifié, il pourra naviguer dans les autres pages */}
           <Route path="/" element={user ? <Layout handleDrawerToggle={handleDrawerToggle} mobileOpen={mobileOpen} /> : <Navigate to="/" />}>
-          {/* <Route path="/" element={user ? <Dashboard /> : <Navigate to="/" />}></Route> */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="TimeLinesToAll" element={<TimeLinesToAll />} />
             <Route path="statistiques" element={<Statistiques />} />

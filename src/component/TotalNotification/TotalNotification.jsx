@@ -8,7 +8,7 @@ const TotalNotification = ({ data }) => {
 
     // Parcourir les données pour compter les notifications
     data.forEach(region => {
-      region.childs.forEach(company => {
+      region?.childs.forEach(company => {
         company.childs.forEach(brigade => {
           if (brigade.notifications) {
             totalNotifications += brigade.notifications.length;

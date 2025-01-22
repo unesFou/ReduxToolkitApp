@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchDashboardData } from './../../features/dashboardSlice/dashboardSlice';
 import { fetchTimelineData } from './../../features/timelineSlice/timelineSlice';
 import ErrorPage from './../error/Error';
+import { Spinner } from 'react-bootstrap';
 import TimeLineChart from './TimeLineChart/TimeLineChart';
 import './TimeLinesToAll.css';
 import icone from '../../images/iconeImage.png';
@@ -18,11 +19,33 @@ const TimeLinesToAll = () => {
   const [grandChildRows, setGrandChildRows] = useState([]);
   const [thirdGridRows, setThirdGridRows] = useState([]);
 
+  const today = new Date();
+  const currentHour = today.getHours();
+  //let startDate = new Date(today);
+  const start = new Date();
+
   useEffect(() => {
-    const start = new Date();
-    start.setHours(8, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 0, 0);
+    // start.setHours(8, 0, 0, 0);
+    // const end = new Date();
+    // end.setHours(23, 59, 0, 0);
+    if (currentHour >= 8) {
+      start.setHours(8 ,0, 0, 0); // Définir la date de début à 8h00
+    } else {
+      // Si le temps courant est avant 8h00, la date de début est à 8h00 de la journée précédente
+      start.setDate(start.getDate() - 1);
+      start.setHours(8, 0, 0, 0); // Définir la date de début à 8h00
+    }
+    
+    // Calculer la date de fin en fonction du temps courant
+    let end = new Date(today);
+    if (currentHour >= 8) {
+      // Si le temps courant est après 8h00, la date de fin est le temps courant
+      end.setSeconds(0);
+    } else {
+      // Si le temps courant est avant 8h00, la date de fin est 7h59 du jour suivant
+      end.setDate(end.getDate());
+      end.setHours(7, 59, 0, 0); // Définir la date de fin à 7h59 du jour suivant
+    }
     dispatch(fetchDashboardData({ date_start: start.toISOString().slice(0, 16), date_end: end.toISOString().slice(0, 16) }));
   }, [dispatch]);
 
@@ -31,7 +54,7 @@ const TimeLinesToAll = () => {
       const normalizedData = Array.isArray(rawData) ? rawData : rawData.data || [];
       setData(normalizedData);
     }
-  }, [rawData]);
+  }, [data,rawData]);
 
   useEffect(() => {
     if (data.length > 0) {
@@ -41,11 +64,12 @@ const TimeLinesToAll = () => {
         const children = firstParent.childs.map((child) => ({
           id: child.id,
           name: child.name,
+          nbr_notifs : child.nbr_notifs,
           notifications: child.camera_ids?.reduce((total, camera) => {
             return total + (camera.notifications?.length || 0);
           }, 0) || 0,
           childs: child.childs,
-        }));
+         }));
   
         setChildRows(children);
   
@@ -74,7 +98,7 @@ const TimeLinesToAll = () => {
                 const grandChildren = firstChild.childs.map((grandChild, index) => ({
                   id: grandChild.id,
                   name: grandChild.name,
-                  notifications: results[index]?.payload?.notifications || 0,
+                  notifications: results[index]?.payload?.nbr_notifs || 0, //grandChild.nbr_notifs, 
                 }));
   
                 setGrandChildRows(grandChildren);
@@ -131,18 +155,18 @@ const TimeLinesToAll = () => {
   // ];
 
   const thirdGridColumns = [
-    { field: 'name', headerName: 'Brigade', width: 150, filterable: true },
+    { field: 'name', headerName: 'Brigade', width: 120, filterable: true },
     {
       field: 'chart',
       headerName: 'Notifications en Temps Réel',
-      minWidth: 750,
+      minWidth: 650,
       renderCell: (params) => (
         <div>
           <TimeLineChart grandChild={params.row} />
         </div>
       ),
     },
-    {filed : '', headerName : 'images Absence',  width: 150, filterable: true ,renderCell : (paras) => (
+    {filed : '', headerName : 'images Absence',  width: 100, filterable: true ,renderCell : (paras) => (
       <div style={{
         display: 'inline-flex',
         justifyContent: 'center',
@@ -163,10 +187,12 @@ const TimeLinesToAll = () => {
     const children = parent.childs.map((child) => ({
       id: child.id,
       name: child.name,
+      nbr_notifs : child.nbr_notifs,
       notifications: child.camera_ids?.reduce((total, camera) => {
-        return total + (camera.notifications?.length || 0);
-      }, 0) || 0,
-      childs: child.childs,
+         return total + (camera.notifications?.length || 0);
+       }, 0) || 0,
+       childs: child.childs,
+      
     }));
 
     setChildRows(children);
@@ -228,7 +254,19 @@ const TimeLinesToAll = () => {
   };
   
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+          <div
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+            }}
+          >
+            <Spinner animation="border" variant="primary" />
+          </div>
+        );
+  }
   if (error) {
     console.log('error', error);
     return <ErrorPage errorMessage={error} />;
@@ -248,10 +286,10 @@ const TimeLinesToAll = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((parent) => (
+            {data && data.map((parent) => (
               <tr style={{cursor: 'pointer'}} key={parent.id} onClick={() => handleRowClick({ row: parent })}>
                 <td>{parent.name}</td>
-                <td style={{textAlign:'center'}}>{parent.totalNotifications || 0}</td>
+                <td style={{textAlign:'center'}} >{parent.nbr_notifs || 0} </td>
               </tr>
             ))}
           </tbody>
@@ -272,7 +310,7 @@ const TimeLinesToAll = () => {
               {childRows.map((child) => (
                 <tr style={{cursor: 'pointer'}} key={child.id} onClick={() => handleChildRowClick({ row: child })}>
                   <td>{child.name}</td>
-                  <td style={{textAlign:'center'}}>{child.notifications}</td>
+                  <td style={{textAlign:'center'}}>{child.nbr_notifs}</td>
                  
                 </tr>
               ))}

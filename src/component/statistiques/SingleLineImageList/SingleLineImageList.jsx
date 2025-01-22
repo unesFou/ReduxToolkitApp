@@ -22,28 +22,24 @@ export default function SingleLineImageList({ bt_id }) {
     return `data:image/png;base64,${decodedImage}`;
   };
 
+  
+
   const fetchData = async () => {
     try {
-      const date_s = new Date();
-      if (date_s.getHours() < 8) {
-        date_s.setDate(date_s.getDate() - 2);
-      } else {
-        date_s.setDate(date_s.getDate() - 1);
-      }
-      date_s.setHours(8, 0, 0, 0);
-      const date_e = new Date(date_s.getTime() +  (24 * 60 * 60 * 1000));
-  
-      // const dateStartRate = date_s.toISOString().slice(0, 16);
-      // const dateEndRate = date_e.toISOString().slice(0, 16);
-  
-      const dateStartRate = date_s;
-      const dateEndRate = date_e;
+      const start = new Date();
+    if (start.getHours() < 8) {
+      start.setDate(start.getDate() - 2);
+    } else {
+      start.setDate(start.getDate() - 1);
+    }
+    start.setHours(8, 0, 0, 0);
+    const end = new Date(start.getTime() +  (24 * 60 * 60 * 1000));
 
       const timelineResults = await dispatch(
         fetchTimelineData({
           bt_id,
-          date_start: dateStartRate.toISOString().slice(0, 16),
-          date_end: dateEndRate.toISOString().slice(0, 16),
+          date_start: start.toISOString().slice(0, 16),
+          date_end: end.toISOString().slice(0, 16),
         })
       ).unwrap();
 
@@ -57,13 +53,21 @@ export default function SingleLineImageList({ bt_id }) {
   };
 
   const fetchImageById = async (id) => {
-    setImageLoading(true); // Indiquer que l'image est en train de se charger
+    setImageLoading(true);
     try {
       const response = await axios.post(
-        `http://localhost:8069/api/img_notif/${id}`,
-        { params: {} },
+        `/api/img_notif/${id}`,
+        {},
+        {
+          headers : {
+            'Content-Type' : 'application/json',
+            Accept : 'application/json'
+          },
+         // withCredentials: true 
+        },
         { withCredentials: true }
       );
+      console.log('Response img:', response);
 
       if (response.data.result) {
         const image = handleImageInBase64(response.data.result);

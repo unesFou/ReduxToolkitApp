@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo ,useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardData } from "./../../features/dashboardSlice/dashboardSlice";
 import { setDates } from './../../features/dateSlice/dateSlice';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper ,TextField, Tab, Tabs } from "@mui/material";
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import CachedIcon from '@mui/icons-material/Cached';
 import Button from '@mui/material/Button';
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { format } from 'date-fns';
 // import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
 import Chart from "react-apexcharts";
 import Alert from '@mui/material/Alert';
@@ -22,94 +25,156 @@ const Historique = () => {
   const [sortedData, setSortedData] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [chartSortOrder, setChartSortOrder] = useState("asc");
+  const [activeTab, setActiveTab] = useState(0); 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const tableRef = useRef(null);
 
   
-      const formattedStartDate = startDate ? new Date(startDate).toLocaleDateString() : 'Non défini';
-      const formattedEndDate = endDate ? new Date(endDate).toLocaleDateString() : 'Non défini';
+      // const formattedStartDate = startDate ? new Date(startDate).toLocaleDateString() : 'Non défini';
+      // const formattedEndDate = endDate ? new Date(endDate).toLocaleDateString() : 'Non défini';
+      const formattedStartDate = startDate ? format(new Date(startDate), 'dd/MM/yyyy') : 'Non défini';
+      const formattedEndDate = endDate ? format(new Date(endDate), 'dd/MM/yyyy') : 'Non défini';
       
       const defaultStartDate = new Date();
       defaultStartDate.setHours(8, 0, 0, 0); // 08:00
       const defaultEndDate = new Date();
-      defaultEndDate.setHours(23, 59, 0, 0); // 23:59
+      //defaultEndDate.setHours(23, 59, 0, 0); // 23:59
 
+      const handleTabChange = (event, newValue) => {
+        setActiveTab(newValue); // Change l'onglet actif
+      };
+
+           
       useEffect(() => {
-        // Si les dates ne sont pas définies (par exemple, si elles n'ont pas été sélectionnées par l'utilisateur),
-        // on les remplace par les dates par défaut
-        // const startDatee = defaultStartDate ? defaultStartDate : new Date(startDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16);
-        // const endDatee = defaultEndDate ? defaultEndDate : new Date(endDate.setHours(8, 0, 0, 0)).toISOString().slice(0, 16);
+        let isMounted = true; 
       
-        // Fonction pour convertir une date au format "dd/mm/yyyy" en format "yyyy-mm-dd"
-        const convertDateFormat = (dateStr) => {
-          const [day, month, year] = dateStr.split('/');
-          return new Date(year, month - 1, day, 8, 0, 0, 0);
+        const calculateDates = () => {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+      
+          const currentTime = new Date();
+      
+          const startDateObj = startDate instanceof Date ? startDate : null;
+          const endDateObj = endDate instanceof Date ? endDate : null;
+      
+          let calculatedStartDate = null;
+          let calculatedEndDate = null;
+      
+          if (startDateObj && !endDateObj) {
+            if (startDateObj.toDateString() === today.toDateString()) {
+              calculatedStartDate = new Date(startDateObj.setHours(8, 0, 0, 0));
+              calculatedEndDate = currentTime;
+            } else {
+              calculatedStartDate = new Date(startDateObj.setHours(8, 0, 0, 0));
+              const nextDay = new Date(startDateObj);
+              calculatedEndDate = new Date(nextDay.setDate(nextDay.getDate() + 1));
+              calculatedEndDate.setHours(8, 0, 0, 0);
+            }
+          } else if (startDateObj && endDateObj) {
+            calculatedStartDate = new Date(startDateObj.setHours(8, 0, 0, 0));
+            const nextDay = new Date(endDateObj);
+            calculatedEndDate = new Date(nextDay.setDate(nextDay.getDate() + 1));
+            calculatedEndDate.setHours(8, 0, 0, 0);
+          } else {
+            calculatedStartDate = new Date(today.setHours(8, 0, 0, 0));
+            calculatedEndDate = currentTime;
+          }
+      
+          return {
+            startDate: calculatedStartDate?.toISOString().slice(0, 16) || null,
+            endDate: calculatedEndDate?.toISOString().slice(0, 16) || null,
+          };
         };
       
-        // Convertir les dates formatées en objets Date
-        // if (startDate === null && endDate === null){
-        //   let startDate_null = new Date();
-        //   startDate_null.setHours(8, 0, 0, 0);
-        //   startDate = startDate_null;
-        //   let endDate_null = new Date();
-        //   endDate_null.setHours(23, 59, 0, 0);
-        //   endDate = endDate_null;
-        
-        // }
-        const formattedStartDatee = new Date(convertDateFormat(formattedStartDate).setHours(8,0,0,0)).toISOString().slice(0, 16);
-        const formattedEndDatee = new Date(convertDateFormat(formattedEndDate).setHours(23,59,0,0)).toISOString().slice(0, 16);
+        const { startDate: finalStartDate, endDate: finalEndDate } = calculateDates();
       
-        // Vérifier si les dates sont sélectionnées
-        if (formattedStartDatee !== defaultStartDate.toISOString().slice(0, 16) && formattedEndDatee !== defaultEndDate.toISOString().slice(0, 16)) {
+        if (isMounted && finalStartDate && finalEndDate) {
           dispatch(setDates({
-            startDate: formattedStartDatee,
-            endDate: formattedEndDatee,
-          }))
-          dispatch(fetchDashboardData({
-            date_start: formattedStartDatee,
-            date_end: formattedEndDatee,
+            startDate: startDate,
+            endDate: endDate,
           }));
-          ;
-        } else {
-          // Fetch les données avec les dates mises à jour
+      
           dispatch(fetchDashboardData({
-            date_start: defaultStartDate.toISOString().slice(0, 16),
-            date_end: defaultEndDate.toISOString().slice(0, 16),
+            date_start: finalStartDate,
+            date_end: finalEndDate,
           }));
         }
-      }, [dispatch, startDate, endDate, formattedStartDate, formattedEndDate]);
+      
+        return () => {
+          isMounted = false;
+        };
+      }, [dispatch, startDate, endDate]);
+      
+      
+      
+      
+      
+      const formatDuration = (seconds) => {
+        const days = Math.floor(seconds / (3600 * 24));
+        const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+      
+        // Si les jours sont supérieurs à 0, on les affiche
+        if (days > 0) {
+          return `${days} jours , ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+        }
+      
+        // Sinon, afficher seulement les heures, minutes et secondes
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      };
+      
+     // Fonction pour basculer en plein écran
+  const toggleFullscreen = () => {
+    if (!tableRef.current) {
+      console.error("Table is not available for fullscreen");
+      return;
+    }
 
-  const formatDuration = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    if (isFullscreen) {
+      if (tableRef.current.requestFullscreen) {
+        tableRef.current.requestFullscreen();
+      } else if (tableRef.current.webkitRequestFullscreen) { // Safari
+        tableRef.current.webkitRequestFullscreen();
+      } else if (tableRef.current.msRequestFullscreen) { // IE/Edge
+        tableRef.current.msRequestFullscreen();
+      }
+    }
+
+    setIsFullscreen(!isFullscreen);
   };
 
   const getFilteredParents = () => {
     if (!data || !Array.isArray(data)) return [];
     return data.map((region) => {
-      const totalAbsRegion = region.childs
+      const totalAbsRegion = region?.childs
         .flatMap((company) => company.childs)
         .reduce((sum, brigade) => sum + (brigade.abs_duration || 0), 0);
   
       return {
         regionName: region.name,
-        totalAbsRegion, // Total absence pour la région
+        totalAbsRegion,
+        absence_Rate :  region.presence_rate,
         childs: region.childs.map((company) => {
           const totalAbsCompany = company.childs.reduce(
             (sum, brigade) => sum + (brigade.abs_duration || 0),
             0
           );
-  
           return {
             companyName: company.name,
-            totalAbsCompany, // Total absence pour la compagnie
+            totalAbsCompany,
+            companyPresenceRate: company.presence_rate,
+            absDurationCieInSeconds : company.absDuration,
+            bt_ratio : company.bt_ratio,
             brigades: company.childs
               .filter((brigade) => brigade.abs_duration !== undefined)
               .map((brigade) => ({
                 brigadeName: brigade.name,
                 absDuration: formatDuration(brigade.abs_duration),
                 absDurationInSeconds: brigade.abs_duration,
-              })),
+                presence_rate : brigade.presence_rate,
+                
+              }))
           };
         }),
       };
@@ -133,9 +198,26 @@ const Historique = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
+  const handleSort_cie = () => {
+    const sorted = [...sortedData];
+    sorted.forEach((region) => {
+      region.childs.forEach((company) => {
+        company.sort((a, b) => {
+          if (sortOrder === "asc") {
+            return a.absDurationCieInSeconds - b.absDurationCieInSeconds;
+          } else {
+            return b.absDurationCieInSeconds - a.absDurationCieInSeconds;
+          }
+        });
+      });
+    });
+    setSortedData(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
   const filteredData = getFilteredParents().filter((region) =>
     region.regionName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).sort((a, b) => b.absence_Rate - a.absence_Rate);
 
   const flattenDataForExcel = () => {
     const flattenedData = [];
@@ -144,9 +226,11 @@ const Historique = () => {
         company.brigades.forEach((brigade, brigadeIdx) => {
           flattenedData.push({
             Region: companyIdx === 0 && brigadeIdx === 0 ? region.regionName : "", // Fusionner les cellules Région
-            "Total Absence Région": companyIdx === 0 && brigadeIdx === 0 ? formatDuration(region.totalAbsRegion) : "", // Fusionner Total Région
+            "Total Absence Région": companyIdx === 0 && brigadeIdx === 0 ? companyIdx === 0 && brigadeIdx === 0 ? `${formatDuration(region.totalAbsRegion)} Taux : ${region.absence_Rate}%` : "" : "", 
+            "Taux de Présence Région" : region.absence_Rate ,
             Compagnie: brigadeIdx === 0 ? company.companyName : "", // Fusionner les cellules Compagnie
             "Total Absence Compagnie": brigadeIdx === 0 ? formatDuration(company.totalAbsCompany) : "", // Fusionner Total Compagnie
+            "Taux de Présence Compagnie" : company.companyPresenceRate,
             Brigade: brigade.brigadeName,
             "Durée d'absence": brigade.absDuration,
           });
@@ -166,7 +250,7 @@ const Historique = () => {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    doc.text("Filtered Data", 20, 10);
+    doc.text(`Statistiques d'Absence entre ${formattedStartDate} et ${formattedEndDate}`, 20, 10);
 
     const pdfData = [];
     filteredData.forEach((region) => {
@@ -174,7 +258,7 @@ const Historique = () => {
         company.brigades.forEach((brigade, brigadeIdx) => {
           pdfData.push([
             companyIdx === 0 && brigadeIdx === 0 ? region.regionName : "", // Fusion Région
-            companyIdx === 0 && brigadeIdx === 0 ? formatDuration(region.totalAbsRegion) : "", // Total Région
+            companyIdx === 0 && brigadeIdx === 0 ? `${formatDuration(region.totalAbsRegion)} Taux : ${region.absence_Rate}%` : "", // Total Région
             brigadeIdx === 0 ? company.companyName : "", // Fusion Compagnie
             brigadeIdx === 0 ? formatDuration(company.totalAbsCompany) : "", // Total Compagnie
             brigade.brigadeName,
@@ -189,7 +273,7 @@ const Historique = () => {
       body: pdfData,
       styles: { fontSize: 8 },
       columnStyles: {
-        0: { cellWidth: 40 }, // Région
+        0: { cellWidth: 20 }, // Région
         1: { cellWidth: 30 }, // Total Région
         2: { cellWidth: 40 }, // Compagnie
         3: { cellWidth: 30 }, // Total Compagnie
@@ -239,46 +323,48 @@ const Historique = () => {
         dataPointSelection: (event, chartContext, config) => {
           const selectedRegion = sortedChartData[config.dataPointIndex].name;
           setSearchTerm(selectedRegion);
-          console.log(selectedRegion)
-        } 
-       },
+        },
+      },
     },
     plotOptions: {
-          bar: {
-            borderRadius: 10,
-            dataLabels: {
-              position: 'top', // top, center, bottom
-            },
-          }
+      bar: {
+        borderRadius: 10,
+        dataLabels: {
+          position: "top",
         },
+      },
+    },
     xaxis: {
-      categories: sortedChartData.map((region) => region.name),
+      categories: sortedChartData.map((region) => region.name), // Nom des régions
       title: {
         text: "",
       },
     },
     yaxis: {
+      labels: {
+        formatter: (value) => formatDuration(value), // Utiliser formatDuration pour les labels
+      },
       title: {
-        text: "",
+        text: "Durée totale d'absence",
       },
     },
     tooltip: {
       y: {
-        formatter: (value) => `${formatDuration(value)}`,
+        formatter: (value) => formatDuration(value), // Formater les tooltips avec formatDuration
       },
     },
     dataLabels: {
       enabled: false,
     },
   };
-
+  
   const chartSeries = [
     {
       name: "Total Absence",
-      //data: chartData?.map((region) => region.absTotal) || [],
-      data : sortedChartData.map((region) => region.absTotal)
+      data: sortedChartData.map((region) => region.absTotal), // Total en secondes
     },
   ];
+  
 
   const handleRegionClick = (regionName) => {
     setSelectedRegion(regionName);
@@ -337,21 +423,57 @@ const Historique = () => {
       {/* Graphique pour les absences par région */}
        <div className="d-flex justify-content-end mb-3">
                {/* <h5>Statistiques d'Absence entre {startDate} et {endDate}</h5> */}
-               <Button class="btn btn-success" onClick={exportToExcel} style={{ marginRight: '15px' }}>
+               <Button class="btn btn-success" onClick={exportToExcel} style={{ marginRight: '10px' , height: '0%'}}>
                  Exporter en Excel
                </Button>
-               <Button class="btn btn-warning" onClick={exportToPDF} style={{ marginRight: '15px'}}>
+               <Button class="btn btn-warning" onClick={exportToPDF} style={{ marginRight: '10px' , height: '0%'}} >
                  Exporter en PDF
                </Button>
+               <div className="d-flex justify-content-end mb-3" style={{ marginTop: '0.5%'}}>
+               <FullscreenIcon
+                        onClick={toggleFullscreen}
+                        style={{
+                          fontSize: '24px',  // Ajuste la taille de l'icône
+                          cursor: 'pointer', // Optionnel pour indiquer que l'icône est cliquable
+                          marginBottom: '15px',
+                          marginRight: '15px',
+                          verticalAlign: 'middle',
+                          // Aligner verticalement l'icône par rapport aux boutons
+                        }} 
+                        />
              </div>
+             </div>
+              
              <h5 className="text-center mb-3">
-               Statistiques d'Absence entre {formattedStartDate} et {formattedEndDate}
+               Statistiques d'Absence entre {formattedStartDate} et {formattedEndDate} <CachedIcon onClick={() => setSearchTerm("")} style={{cursor: "pointer"}}/>
              </h5>
       <div style={{ width: '100%', height: 350 }}>
       <Chart options={chartOptions} series={chartSeries} type="bar" height={250} />
       </div>
-
-      <TableContainer component={Paper} style={{ maxHeight: '1000px', overflowY: 'auto' }}>
+       
+       <Tabs value={activeTab} onChange={handleTabChange} aria-label="Tabs pour afficher les tables" centered sx={{
+                                                                                                                    backgroundColor: '#f5f5f5',
+                                                                                                                    borderRadius: '8px',
+                                                                                                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Ombre portée
+                                                                                                                  }}>
+        <Tab label="Situation par Région" sx={{
+                                                color: activeTab === 0 ? '#1976d2' : '#000',
+                                                fontWeight: activeTab === 0 ? 'bold' : 'normal',
+                                                '&:hover': {
+                                                  backgroundColor: '#e3f2fd',
+                                                },
+                                              }}/>
+        <Tab label="Situation par Compagnie"  sx={{
+                                                    color: activeTab === 1 ? '#1976d2' : '#000',
+                                                    fontWeight: activeTab === 1 ? 'bold' : 'normal',
+                                                    '&:hover': {
+                                                      backgroundColor: '#e3f2fd',
+                                                    },
+                                                  }}/>
+      </Tabs>
+      {/* {activeView === "table1" && ( */}
+      {activeTab === 0 && (
+      <TableContainer component={Paper} style={{ maxHeight: '1000px', overflowY: 'auto' }} ref={tableRef}>
               <Table>
                 <TableHead style={{ backgroundColor: '#fff893', position: 'sticky', top: 0, zIndex: 1 }}>
                   <TableRow>
@@ -376,7 +498,7 @@ const Historique = () => {
                       return company.brigades.map((brigade, brigadeIdx) => (
                         <TableRow key={`${region.regionName}-${company.companyName}-${brigade.brigadeName}`}>
                           {companyIdx === 0 && brigadeIdx === 0 && (
-                            <TableCell rowSpan={regionRowSpan} align="center" style={{ verticalAlign: "middle" }}>
+                            <TableCell rowSpan={regionRowSpan} align="center" style={{ verticalAlign: "middle" ,fontWeight: 'bold'}}>
                               {region.regionName}
                             </TableCell>
                           )}
@@ -388,15 +510,24 @@ const Historique = () => {
                               </TableCell>
                               <TableCell rowSpan={companyRowSpan} align="center" style={{ verticalAlign: "middle" }}>
                                 <Button variant="outlined" color="error">{formatDuration(company.totalAbsCompany)}</Button>
+                                <Button variant="outlined" color="info">{company.companyPresenceRate}%</Button>
+                                <Button variant="text" color="secondary">{company.bt_ratio}</Button>
                               </TableCell>
                             </>
                           )}
       
                           <TableCell align="center">{brigade.brigadeName}</TableCell>
-                          <TableCell align="center">{brigade.absDuration}</TableCell>
+                          <TableCell align="center">
+                          <Button variant="outlined" color="error"> {brigade.absDuration}</Button>
+                          <Button variant="outlined" color="info">{brigade.presence_rate} %</Button>
+                          </TableCell>
                           {companyIdx === 0 && brigadeIdx === 0 && (
                             <TableCell rowSpan={regionRowSpan} align="center" style={{ verticalAlign: "middle" }}>
+                              <div style={{ display: 'grid'}}>
+
                               <Button variant="outlined" color="error">{formatDuration(region.totalAbsRegion)}</Button>
+                              <Button variant="outlined" color="info">{region.absence_Rate} %</Button>
+                              </div>
                             </TableCell>
                           )}
                         </TableRow>
@@ -405,7 +536,59 @@ const Historique = () => {
                   })}
                 </TableBody>
               </Table>
-            </TableContainer>
+            </TableContainer>)}
+      {/* {activeView === "table2" && ( */}
+      {activeTab === 1 && (
+      <TableContainer component={Paper} style={{ maxHeight: '1000px', overflowY: 'auto' }}  ref={tableRef}>
+              <Table>
+                <TableHead style={{ backgroundColor: '#fff893', position: 'sticky', top: 0, zIndex: 1 }}>
+                  <TableRow>
+                    {/* <TableCell align="center">Région</TableCell> */}
+                    <TableCell align="center" >Compagnie </TableCell>
+                    <TableCell align="center"onClick={handleSort_cie} style={{ cursor: "pointer" }} >Total Absence Compagnie {sortOrder === "asc" ? "↑" : "↓"}</TableCell>
+                    <TableCell align="center">Brigade </TableCell>
+                    <TableCell align="center" onClick={handleSort} style={{ cursor: "pointer" }}>
+                      Durée d'absence {sortOrder === "asc" ? "↑" : "↓"}
+                    </TableCell>
+                    {/* <TableCell align="center">Total Absence Région</TableCell> */}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sortedAndFilteredData.map((region) => {
+                    const regionRowSpan = region.childs.reduce(
+                      (total, company) => total + company.brigades.length,
+                      0
+                    );
+                    return region.childs.map((company, companyIdx) => {
+                      const companyRowSpan = company.brigades.length;
+                      return company.brigades.map((brigade, brigadeIdx) => (
+                        <TableRow key={`${region.regionName}-${company.companyName}-${brigade.brigadeName}`}>
+                         
+                          {brigadeIdx === 0 && (
+                            <>
+                              <TableCell rowSpan={companyRowSpan} align="center" style={{ verticalAlign: "middle" }}>
+                                {company.companyName}
+                              </TableCell>
+                              <TableCell rowSpan={companyRowSpan} align="center" style={{ verticalAlign: "middle" }}>
+                                <Button variant="outlined" color="error">{formatDuration(company.totalAbsCompany)}</Button>
+                                <Button variant="outlined" color="info">{company.companyPresenceRate}%</Button>
+                                <Button variant="text" color="secondary">{company.bt_ratio}</Button>
+                              </TableCell>
+                            </>
+                          )}
+
+                          <TableCell align="center">{brigade.brigadeName}</TableCell>
+                          <TableCell align="center">
+                            <Button variant="outlined" color="error">{brigade.absDuration}</Button>
+                            <Button variant="outlined" color="info">{brigade.presence_rate} %</Button>
+                            </TableCell>
+                          </TableRow>
+                      ));
+                    });
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>)}
      
     </div>
   );

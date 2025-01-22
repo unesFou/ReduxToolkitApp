@@ -97,7 +97,7 @@ const TimeLinesByUnit = ({ allData, date_start, date_end }) => {
       {/* Graphique à gauche */}
       <div style={{ flex: 3, minWidth: '60%' }}>
         {chartData.length > 0 ? (
-          <ApexChart options={options} series={series} type="bar" height={350} />
+          <ApexChart options={options} series={series} type="bar" height={750} />
         ) : (
           <div>Aucune absence trouvée</div>
         )}

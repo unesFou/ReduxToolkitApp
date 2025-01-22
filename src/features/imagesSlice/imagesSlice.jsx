@@ -11,7 +11,7 @@ export const fetchImages = createAsyncThunk(
       return images.cache[id]; // Retourner les données mises en cache
     }
     // Si non en cache, effectuer la requête API
-    const response = await axios.get(`http://localhost:8069/api/img_notif/${id}`);
+    const response = await axios.get(`/api/img_notif/${id}`);
     return { id, images: response.data };
   }
 );

@@ -32,14 +32,14 @@ const ChildCard = ({ child, isSelected }) => {
       <CardContent>
         
         <Typography variant="body2" style={{ fontWeight: 'bold' }}>
-          Unité : {child.name}
+          Unité : {child.name} <label style={{color:'red'}}>{child.presence_rate}% </label> de présence
         </Typography>
         <Typography variant="body2" style={{ fontWeight: 'bold' }}>
           Total d'absence : {convertSecondsToTimeFormat(child.absence_duration)}
         </Typography>
-         <Typography variant="body2" style={{ fontWeight: 'bold' }}>
+         {/* <Typography variant="body2" style={{ fontWeight: 'bold' }}>
           Rate  : {child.presence_rate} %
-        </Typography> 
+        </Typography>  */}
       </CardContent>
     </Card>
   );

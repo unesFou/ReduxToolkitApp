@@ -32,14 +32,18 @@ const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.user = null;
+      localStorage.clear();
+      sessionStorage.clear();
+      window.localStorage.clear();
       localStorage.removeItem('user');
+      localStorage.removeItem('persist');
       localStorage.clear(); 
     },
     loadUserFromStorage(state) {
       const storedUser = localStorage.user;
       if (storedUser) {
-        // state.user = JSON.parse(storedUser);
-        state.user = storedUser;
+         state.user = JSON.parse(storedUser);
+        //state.user = storedUser;
       }
     },
   },
