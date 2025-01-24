@@ -1,149 +1,97 @@
-//import React from 'react';
-import React, { useState } from 'react';
+import React from 'react';
+import Plot from 'react-plotly.js';
 
-import ApexChart from 'react-apexcharts';
+const TimeLineChart = ({ grandChild }) => {
+  console.log('grandChild', grandChild);
 
-
-const TimeLineChart = ({ grandChild , start , end}) => {
-  console.log('Data Notifs ', grandChild);
-
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2,'0');
-  const minutes = String(now.getMinutes()).padStart(2,'0');
-  const time = `${hours} : ${minutes}`
-  //const [rows, setRows] = useState([]);
-
-  // Définir l'heure de début et de fin de la journée
   const startOfDay = new Date();
-  startOfDay.setHours(8, 0, 0, 0);
-  // const endOfDay = new Date(startOfDay);
-  // endOfDay.setHours(24, 0, 0, 0);
+  startOfDay.setHours(9, 0, 0, 0); // Début de journée à 09:00 locale
 
-  const endOfDay = new Date(startOfDay);
-  endOfDay.setHours(24, 0, 0, 0);
+  const now = new Date(); // Heure actuelle locale
 
+  const transformDataToTimeline = (grandChild) => {
+    if (!Array.isArray(grandChild?.dataChart)) {
+      return [];
+    }
 
-
-  // Transformer les données du grandChild en données utilisables par ApexCharts
-  const transformGrandChildToTimelineData = (unite_id) => {
-    if (!Array.isArray(grandChild?.dataChart)) return { presenceData: [], absenceData: [] };
-  
-    const presenceData = [];
-    const absenceData = [];
-    const filteredData = grandChild.dataChart.filter((child) => child.unite_id === unite_id);
-  
-    // Trier les périodes d'absence pour éviter les chevauchements dans les calculs
-    const absenceRanges = filteredData.map((child) => ({
+    const filteredData = grandChild.dataChart.map((child) => ({
       start: new Date(child.date_s),
       end: new Date(child.date_e),
-    })).sort((a, b) => a.start - b.start);
-    // setRows(absenceRanges)
-    // console.log('absenceRanges',absenceRanges)
-    // Début de la journée
-    let currentStart = startOfDay;
-  
-    absenceRanges.forEach((range) => {
-      const { start, end } = range;
-  
-      // Ajouter la période de présence avant l'absence si elle existe
-      if (currentStart < start) {
-        presenceData.push({
-          x: 'Présence',
-          y: [
-            (currentStart - startOfDay) / (1000 * 60 * 60), // Début de la période de présence
-            (start - startOfDay) / (1000 * 60 * 60),       // Début de l'absence
-          ],
-          start : new Date(range.start).toLocaleString(),
-          end : new Date(range.end).toLocaleString()
+    }));
+
+    const segments = [];
+    let currentTime = startOfDay;
+
+    // Trier les données par date de début
+    filteredData.sort((a, b) => a.start - b.start);
+
+    filteredData.forEach(({ start, end }) => {
+      // Ajouter une ligne verte (présence) si nécessaire
+      if (currentTime < start) {
+        segments.push({
+          start: currentTime,
+          end: start,
+          type: 'presence', // Présence
         });
       }
-  
-      // Ajouter la période d'absence
-      absenceData.push({
-        x: 'Absence',
-        y: [
-          Math.max((start - startOfDay) / (1000 * 60 * 60), 0), // Début de l'absence
-          Math.min((end - startOfDay) / (1000 * 60 * 60), 16),  // Fin de l'absence
-        ],
-        start : new Date(range.start).toLocaleString(),
-        end : new Date(range.end).toLocaleString()
+
+      // Ajouter une ligne rouge (absence)
+      segments.push({
+        start,
+        end,
+        type: 'absence', // Absence
       });
-  
-      // Mettre à jour le début courant pour la prochaine période
-      currentStart = end;
+
+      currentTime = end; // Mettre à jour le temps actuel
     });
-  
-    // Ajouter une période de présence après la dernière absence si elle existe
-    if (currentStart < time) {
-      presenceData.push({
-        x: 'Présence',
-        y: [
-          (currentStart - startOfDay) / (1000 * 60 * 60), // Début après la dernière absence
-          (endOfDay - startOfDay) / (1000 * 60 * 60),     // Fin de la journée
-        ],
+
+    // Ajouter une ligne verte après la dernière absence si nécessaire
+    if (currentTime < now) {
+      segments.push({
+        start: currentTime,
+        end: now,
+        type: 'presence', // Présence
       });
     }
-  
-    return { presenceData, absenceData };
-  };
-  
 
-  // Récupérer les données transformées en appelant la fonction avec l'unite_id
-  const { presenceData, absenceData } = transformGrandChildToTimelineData(grandChild.id);
-  
-  // const startHourforChart = 8;
-  // const nowOfChart = new Date;
-  // const currentOfChart = nowOfChart.getHours() + nowOfChart.getMinutes() / 60;
+    return segments;
+  };
+
+  const timelineSegments = transformDataToTimeline(grandChild);
 
   return (
-    <ApexChart
-      options={{
-        chart: {
-          type: 'rangeBar',
-          height: 150,
-        },
-        tooltip : {
-          custom : function({series , seriesIndex , dataPointIndex , w}){
-            const data = w.globals.initialSeries[seriesIndex].data[dataPointIndex];
-            return `
-            <div style="padding:8px; border: 1px solid #ccc ; background-color: white ; white : 30% ;height:5%; z-index : 1">
-                <strong><em>Start : </em></strong> <strong style="color:red">${data.start}</strong>
-                <strong><em>End : </em></strong><strong style="color:red">${data.end}</strong><br />
-            </div>`
-          }
-        },
-        plotOptions: {
-          bar: {
-            horizontal: true,
+    <Plot
+      data={[
+        ...timelineSegments.map((segment) => ({
+          x: [segment.start.toISOString(), segment.end.toISOString()],
+          y: [segment.type === 'presence' ? 0 : 1, segment.type === 'presence' ? 0 : 1],
+          type: 'scatter',
+          mode: 'lines',
+          line: {
+            color: segment.type === 'presence' ? '#28a745' : '#FF5733', // Vert pour présence, rouge pour absence
+            width: 2,
           },
-        },
+          name: segment.type === 'presence' ? 'Présence' : 'Absence',
+        })),
+      ]}
+      layout={{
+        title: '',
         xaxis: {
-          min: 0,
-          max: 4,
-          labels: {
-            formatter: (value) => `${Math.floor(value + 8)}h`, // Ajouter 8 pour démarrer à 08h00
-          },
+          type: 'date',
+          tickformat: '%H:%M',
+          range: [startOfDay.toISOString(), now.toISOString()],
+          showgrid: true,
         },
         yaxis: {
-          categories: ['Absence', 'Présence'],
+          tickvals: [0, 1],
+          ticktext: ['Présence', 'Absence'],
+          showgrid: true,
         },
-        colors: ['#FF5733', '#28a745'], 
-        title: {
-          text: '',
-        },
+        showlegend: false,
+        margin: { l: 60, r: 60, t: 60, b: 60 },
+        responsive: true,
       }}
-      series={[
-        {
-          name: 'Absence',
-          data: absenceData,
-        },
-        {
-          name: 'Présence',
-          data: presenceData,
-        },
-      ]}
-      type="rangeBar"
-      height="100%"
+      style={{ width: '100%', height: '150px' }}
     />
   );
 };

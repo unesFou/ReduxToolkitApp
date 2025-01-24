@@ -7,7 +7,8 @@ import ErrorPage from './../error/Error';
 import { Spinner } from 'react-bootstrap';
 import TimeLineChart from './TimeLineChart/TimeLineChart';
 import './TimeLinesToAll.css';
-import icone from '../../images/iconeImage.png';
+// import icone from '../../images/iconeImage.png';
+import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 
 const TimeLinesToAll = () => {
   const dispatch = useDispatch();
@@ -94,37 +95,40 @@ const TimeLinesToAll = () => {
                 }))
               )
             )
-              .then((results) => {
-                const grandChildren = firstChild.childs.map((grandChild, index) => ({
+            .then((results) => {
+              const grandChildren = firstChild.childs.map((grandChild, index) => ({
+                id: grandChild.id,
+                name: grandChild.name,
+                notifications: results[index]?.payload?.nbr_notifs || 0, 
+              }));
+            
+              setGrandChildRows(grandChildren);
+            
+              const thirdGridData = grandChildren.map((grandChild) => {
+                const filteredResults = results
+                  .filter((e) => e.payload.bt_id === grandChild.id)
+                  .flatMap((e) => e.payload.data?.notifs || []);
+            
+                return {
                   id: grandChild.id,
                   name: grandChild.name,
-                  notifications: results[index]?.payload?.nbr_notifs || 0, //grandChild.nbr_notifs, 
-                }));
-  
-                setGrandChildRows(grandChildren);
-  
-                const thirdGridData = grandChildren.map((grandChild) => ({
-                  id: grandChild.id,
-                  name: grandChild.name,
-                  dataChart: results
-                    .map((e) => e.payload)
-                    .map((e) => e.data)
-                    .flatMap((e) => e.notifs),
+                  dataChart: filteredResults,
                   chart: (
                     <TimeLineChart
-                      grandChild={results
-                        .map((e) => e.payload)
-                        .map((e) => e.data)
-                        .flatMap((e) => e.notifs)}
+                      grandChild={{
+                        dataChart: filteredResults,
+                      }}
                     />
                   ),
-                }));
-  
-                setThirdGridRows(thirdGridData);
-              })
-              .catch((error) => {
-                console.error('Error fetching data for grand children:', error);
+                };
               });
+            
+              setThirdGridRows(thirdGridData);
+            })
+            .catch((error) => {
+              console.error('Error fetching data for grand children:', error);
+            });
+            
           }
         }
       }
@@ -133,21 +137,21 @@ const TimeLinesToAll = () => {
   
   
 
-  const parentTableColumns = [
-    { field: 'name', headerName: 'Région', width: 150, filterable: true },
-    { field: 'notifications', headerName: 'Notifications', width: 100, filterable: true },
-  ];
+  // const parentTableColumns = [
+  //   { field: 'name', headerName: 'Région', width: 150, filterable: true },
+  //   { field: 'notifications', headerName: 'Notifications', width: 100, filterable: true },
+  // ];
 
-  const childTableColumns = [
-    { field: 'name', headerName: 'Compagnie', width: 150, filterable: true },
-    { field: 'notifications', headerName: 'Notifications', filterable: true ,
-      renderCell: (params) => (
-        <div style={{ width: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {params.value}
-        </div>
-      ),
-    },
-  ];
+  // const childTableColumns = [
+  //   { field: 'name', headerName: 'Compagnie', width: 150, filterable: true },
+  //   { field: 'notifications', headerName: 'Notifications', filterable: true ,
+  //     renderCell: (params) => (
+  //       <div style={{ width: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+  //         {params.value}
+  //       </div>
+  //     ),
+  //   },
+  // ];
 
   // const grandChildColumns = [
   //   { field: 'name', headerName: 'Nom du Child', width: 150, filterable: true },
@@ -162,21 +166,25 @@ const TimeLinesToAll = () => {
       minWidth: 650,
       renderCell: (params) => (
         <div>
-          <TimeLineChart grandChild={params.row} />
+           <TimeLineChart grandChild={params.row} /> 
+          {/* <TimeLineChart grandChild={grandChild.dataChart} /> */}
         </div>
       ),
     },
-    {filed : '', headerName : 'images Absence',  width: 100, filterable: true ,renderCell : (paras) => (
+    {filed : '', headerName : 'images Absence',  width: 100, filterable: true ,renderCell : (params) => (
       <div style={{
         display: 'inline-flex',
         justifyContent: 'center',
         alignItems: 'center',
         height: '50%'
       }}>
-          {/* <button class="btn border border-2 border-dark"> */}
-         <img src={icone}  alt="icone absence"className="w-12 h-8 mx-auto"style={{ maxWidth: '40%' }} />
-          {/* </button> */}
-      </div>
+
+          <button class="btn border border-2 border-red">
+         {/* <img src={icone}  alt="icone absence" className="w-12 h-8 mx-auto"style={{ maxWidth: '40%' }} /> */}
+         <VideoCameraFrontIcon color="error" />
+         
+          </button>
+        </div>
     )}
   ];
 
@@ -200,6 +208,59 @@ const TimeLinesToAll = () => {
     setThirdGridRows([]);
   };
 
+  // const handleChildRowClick = async (params) => {
+  //   const child = childRows.find((c) => c.id === params.row.id);
+  //   if (!child || !child.childs) return;
+  
+  //   const grandChildIds = child.childs.map((grandChild) => grandChild.id);
+  
+  //   const start = new Date();
+  //   start.setHours(7, 0, 0, 0);
+  //   const end = new Date();
+  //   end.setHours(23, 59, 0, 0);
+  
+  //   try {
+  //     const results = await Promise.all(
+  //       grandChildIds.map((id) =>
+  //         dispatch(fetchTimelineData({
+  //           bt_id: id,
+  //           date_start: start.toISOString().slice(0, 16),
+  //           date_end: end.toISOString().slice(0, 16),
+  //         }))
+  //       )
+  //     );
+  //  //   console.log('===============results=============',results)
+  
+  //     // Map grandChildren data with notifications from the API
+  //     const grandChildren = child.childs.map((grandChild, index) => ({
+  //       id: grandChild.id,
+  //       name: grandChild.name,
+  //       notifications: results[index]?.payload?.notifs || [], // Ensure all notifications are included
+  //     }));
+  
+  //     setGrandChildRows(grandChildren);
+  
+  //     // Prepare third grid data, including all notifications from the results
+  //     const thirdGridData = grandChildren.map((grandChild) => ({
+  //       id: grandChild.id,
+  //       name: grandChild.name,
+  //       // Flatten all notifications from grandChild.notifications and ensure none are missed
+  //       //dataChart: grandChild.notifications.flatMap((notification) => notification || []),
+  //       dataChart : results.map(e => e.payload).map(e=>e.data).flatMap(e=>e.notifs) ,
+  //       chart: (
+  //         <TimeLineChart
+  //           grandChild={grandChild.notifications.flatMap((notification) => notification || [])}
+  //         />
+  //       ),
+  //     }));
+  
+  //     setThirdGridRows(thirdGridData);
+  
+  //   } catch (error) {
+  //     console.error('Error fetching notification data:', error);
+  //   }
+  // };
+
   const handleChildRowClick = async (params) => {
     const child = childRows.find((c) => c.id === params.row.id);
     if (!child || !child.childs) return;
@@ -212,6 +273,7 @@ const TimeLinesToAll = () => {
     end.setHours(23, 59, 0, 0);
   
     try {
+      // Fetch data for all grandChild IDs
       const results = await Promise.all(
         grandChildIds.map((id) =>
           dispatch(fetchTimelineData({
@@ -221,37 +283,50 @@ const TimeLinesToAll = () => {
           }))
         )
       );
-   //   console.log('===============results=============',results)
   
       // Map grandChildren data with notifications from the API
-      const grandChildren = child.childs.map((grandChild, index) => ({
-        id: grandChild.id,
-        name: grandChild.name,
-        notifications: results[index]?.payload?.notifs || [], // Ensure all notifications are included
-      }));
+      const grandChildren = child.childs.map((grandChild) => {
+        // Filtrer les résultats pour le grandChild actuel
+        const filteredResults = results
+          .filter((e) => e.payload.bt_id === grandChild.id)
+          .flatMap((e) => e.payload?.data?.notifs || []);
+  
+        return {
+          id: grandChild.id,
+          name: grandChild.name,
+          notifications: filteredResults.length, // Total des notifications
+        };
+      });
   
       setGrandChildRows(grandChildren);
   
       // Prepare third grid data, including all notifications from the results
-      const thirdGridData = grandChildren.map((grandChild) => ({
-        id: grandChild.id,
-        name: grandChild.name,
-        // Flatten all notifications from grandChild.notifications and ensure none are missed
-        //dataChart: grandChild.notifications.flatMap((notification) => notification || []),
-        dataChart : results.map(e => e.payload).map(e=>e.data).flatMap(e=>e.notifs) ,
-        chart: (
-          <TimeLineChart
-            grandChild={grandChild.notifications.flatMap((notification) => notification || [])}
-          />
-        ),
-      }));
+      const thirdGridData = grandChildren.map((grandChild) => {
+        // Filtrer les résultats pour le grandChild actuel
+        const filteredResults = results
+          .filter((e) => e.payload.bt_id === grandChild.id)
+          .flatMap((e) => e.payload?.data?.notifs || []);
+  
+        return {
+          id: grandChild.id,
+          name: grandChild.name,
+          dataChart: filteredResults, // Données spécifiques au grandChild
+          chart: (
+            <TimeLineChart
+              grandChild={{
+                dataChart: filteredResults,
+              }}
+            />
+          ),
+        };
+      });
   
       setThirdGridRows(thirdGridData);
-  
     } catch (error) {
       console.error('Error fetching notification data:', error);
     }
   };
+  
   
 
   if (loading) {
